@@ -1,5 +1,7 @@
 # Carvel
 
+Carvel provides a set of reliable, single-purpose, composable tools that aid in your application building, configuration, and deployment to Kubernetes.
+
 This is a list of repos associated with [Carvel](https://carvel.dev) project.
 
 * [ytt](https://github.com/vmware-tanzu/carvel-ytt) - Template and overlay Kubernetes configuration via YAML structures, not text documents
