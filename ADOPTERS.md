@@ -5,6 +5,8 @@ list, [follow these directions](#adding-your-organization-to-the-list-of-adopter
 
 ## Organizations using Carvel
 
+<a href="https://www.vmware.com" target="_blank"><img alt="VMware" src="adopters/vmware.svg" height="50"></a>
+
 ## Adding your organization to the list of adopters
 
 If you are using Carvel and would like to be included in the list of Carvel Adopters, add an SVG version of your logo to
