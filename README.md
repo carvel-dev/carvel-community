@@ -21,6 +21,12 @@ Installation:
 
 * [homebrew-carvel](https://github.com/vmware-tanzu/homebrew-carvel)
 * [carvel-docker-image](https://github.com/vmware-tanzu/carvel-docker-image)
+* [asdf-carvel](https://github.com/vmware-tanzu/asdf-carvel)
+* [carvel-setup-action](https://github.com/vmware-tanzu/carvel-setup-action)
+
+Plugins:
+
+* [ytt.vim](https://github.com/vmware-tanzu/ytt.vim)
 
 Examples:
 
