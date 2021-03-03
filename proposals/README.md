@@ -6,9 +6,9 @@ A proposal must be sponsored by at least one Carvel Maintainer.  Proposals can b
 
 # Submit a Proposal
 To create a proposal, submit a PR to this directory under the appropriate
-project (for example, `ytt`). If the proposal concerns multiple projects or is
+project with a terse name (for example, `ytt/001-schemas/`). If the proposal concerns multiple projects or is
 intended for the entire Carvel suite then please create the proposal at the root
-of the `proposals` directory.
+of the `proposals` directory (for example, `./010-carvel-cli/`).
 
 When creating the proposal, please add a `Status: Draft` line at the top of the
 proposal to indicate its state.
