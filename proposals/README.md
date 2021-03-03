@@ -1,8 +1,8 @@
 # Carvel Proposals
 This directory serves as the home for Carvel proposals. A proposal is a design
 document that describes a new feature for a Carvel project. The new feature
-can span multiple projects or introduce a new project. Proposals are primarily
-intended for maintainers but are open to the community for collaboration.
+can span multiple projects or introduce a new project. 
+A proposal must be sponsored by at least one Carvel Maintainer.  Proposals can be worked by anyone in the community.
 
 # Submit a Proposal
 To create a proposal, submit a PR to this directory under the appropriate
