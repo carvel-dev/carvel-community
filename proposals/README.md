@@ -10,6 +10,7 @@ project with a terse name (for example, `ytt/001-schemas/`). If the proposal con
 intended for the entire Carvel suite then please create the proposal at the root
 of the `proposals` directory (for example, `./010-carvel-cli/`).
 
+In that directory, create a `README.md` containing the core proposal. Include other files (e.g. sets of example artifacts, if necessary) to help support understanding of the feature.
 When creating the proposal, please add a `Status: Draft` line at the top of the
 proposal to indicate its state.
 
