@@ -14,6 +14,42 @@ In that directory, create a `README.md` containing the core proposal. Include ot
 When creating the proposal, please add a `Status: Draft` line at the top of the
 proposal to indicate its state.
 
+## Proposal Template
+The below template is an example. Other than the high-level details (such as
+title, proposal status, author, and approvers), please use whichever sections
+make the most sense for your proposal.
+
+```md
+# <Proposal Title>
+- Status: *Draft* | In Review | Accepted | Rejected
+- Author(s): <your name>
+- Approvers: <list of names that must sign off>
+
+## Problem Statement
+_This is a short summary of the problem that exists, why it needs to be
+solved, and how this proposal will address this need. The goal of this section is to bring
+readers up to speed quickly._
+
+## Terminology / Concepts
+_Define any terms or concepts that are used throughout this proposal._
+
+## Proposal
+_This is the primary content of the proposal explaining how the problem(s) will
+be addressed._
+
+### Goals and Non-goals
+_A short list of what the goals of this proposal are and are not._
+
+### Specification / Use Cases
+_Detailed explanation of the proposal's design._
+
+## Open Questions
+_A list of questions that need to be answered._
+
+## Answered Questions
+_A list of questions that have been answered._
+```
+
 # Proposal Review
 Once a proposal PR is submitted, project maintainers will review the proposal.
 The goal of the review is to gain an understanding of the problem being solved
