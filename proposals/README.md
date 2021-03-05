@@ -27,8 +27,11 @@ make the most sense for your proposal.
 
 ## Problem Statement
 _This is a short summary of the problem that exists, why it needs to be
-solved, and how this proposal will address this need. The goal of this section is to bring
-readers up to speed quickly._
+solved: what specific needs are being met. Compelling problem statements
+include concrete examples (even if only by reference). How exactly the proposal
+would meet those needs should be located in the "Proposal" section, not this one.
+The goal of this section is to help readers quickly empathize with the target users'
+current experience to motivate the proposed change.
 
 ## Terminology / Concepts
 _Define any terms or concepts that are used throughout this proposal._
