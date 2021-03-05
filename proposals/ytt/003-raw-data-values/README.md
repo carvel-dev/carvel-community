@@ -25,7 +25,7 @@ That said, doing so must not dimish the reliability and safety that `ytt` aims t
 
 There are two (2) broad scenarios considered:
 - [Scenario: Consumer Configuration is Additive](#scenario-consumer-configuration-is-additive)
-- [Scenario: Consumer Configuration (of arrays) To Overwrite Defaults](#scenario-consumer-configuration-(of-arrays)-to-overwrite-defaults)
+- [Scenario: Consumer Configuration (of arrays) To Overwrite Defaults](#scenario-consumer-configuration-of-arrays-to-overwrite-defaults)
 
 **See Also:**
 
