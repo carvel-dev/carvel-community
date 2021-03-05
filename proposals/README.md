@@ -20,10 +20,15 @@ title, proposal status, author, and approvers), please use whichever sections
 make the most sense for your proposal.
 
 ```md
+---
+id: 1
+title: "Writing a HIP"
+authors: [ "Aaron Hurley <ahurley@vmware.com>" ]
+status: "draft"
+approvers: [ "Cari Dean <cdean@vmware.com", "Dmitriy Kalinin <dkalinin@vmware.com>" ]
+---
+
 # <Proposal Title>
-- Status: *Draft* | In Review | Accepted | Rejected
-- Author(s): <your name>
-- Approvers: <list of names that must sign off>
 
 ## Problem Statement
 _This is a short summary of the problem that exists, why it needs to be
