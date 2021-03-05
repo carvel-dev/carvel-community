@@ -46,6 +46,11 @@ _A short list of what the goals of this proposal are and are not._
 ### Specification / Use Cases
 _Detailed explanation of the proposal's design._
 
+### Other Approaches Considered
+_Mention of other reasonable ways that the problem(s)
+could be addressed with rationale for why they were less
+desirable than the proposed approach._
+
 ## Open Questions
 _A list of questions that need to be answered._
 
