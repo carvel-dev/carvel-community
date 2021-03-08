@@ -187,41 +187,6 @@ Within a Starlark program: _(this already exists, today)_
 library.with_data_values(...)
 ```
 
-Through `kapp-controller`:
-```yaml
----
-apiVersion: package.carvel.dev/v1alpha1
-kind: Package
-metadata:
-  name: simple-app.corp.com.1.0.0
-spec:
-  publicName: simple-app.corp.com
-  version: 1.0.0
-  displayName: "simple-app v1.0.0"
-  description: "Package for simple-app version 1.0.0"
-  template:
-    spec:
-      fetch:
-      - imgpkgBundle:
-          image: k8slt/kctrl-example-pkg:v1.0.0
-      template:
-      - ytt:
-          paths:
-          - "config.yml"
-          - "values.yml"
-          fileMarks:
-          - path: "values.yml"
-            type: "yaml-data-values"
-      - kbld:
-          paths:
-          - "-"
-          - ".imgpkg/images.yml"
-      deploy:
-      - kapp: {}
-```
-
-Specifically, note the `/spec/template/spec/template[0]/fileMarks` section.
-
 #### Consideration: Imposed Restrictions on Marked Files
 
 `@data/values` _technically_ is a YAML Document-level annotation. Marking an entire file as "data values" means that _all_ YAML documents within it would be considered as such.  Notably, doing so conflicts with any future feature that aims to support Data Values co-existing with the templates that use them.
@@ -273,6 +238,12 @@ The file mark approach lights-up X concepts:
 4. to include an input as explicit a data values, it _both_ must be included in the set of files implied by the union of the `-f` inputs _and_ be explicitly marked with the `--file-mark '(path):type=yaml-data-values'` flag.
 
 That's a significant difference in cognitive load on the user.
+
+However, this approach couples two concerns: 
+- "typing" a file, i.e. marking it as containing YAML documents that are Data Values;
+- where in the ordering a file is processed.
+
+Furthermore, there already exists a flag named `--data-value-file`. This proposed flag would be confusingly similar.
 
 
 ## Open Questions
