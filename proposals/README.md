@@ -1,18 +1,29 @@
 # Carvel Proposals
 This directory serves as the home for Carvel proposals. A proposal is a design
 document that describes a new feature for a Carvel project. The new feature
-can span multiple projects or introduce a new project. 
-A proposal must be sponsored by at least one Carvel maintainer.  Proposals can be worked by anyone in the community.
+can span multiple projects or introduce a new project. A proposal must be
+sponsored by at least one Carvel maintainer. Proposals can be worked by anyone
+in the community.
+
+# When to Create a Proposal
+The Carvel proposal process is intended for "big" or complex features. _If there
+is significant risk with a potential feature or track of work (such as
+complexity, cost to implement, product viability, etc.)_, then we recommend
+creating a proposal for feedback and approval. _If a potential feature is well
+understood and doesn't impose risk_, then we reccomend a standard GH issue to
+clarify the details.
 
 # Submit a Proposal
 To create a proposal, submit a PR to this directory under the appropriate
-project with a terse name (for example, `ytt/001-schemas/`). If the proposal concerns multiple projects or is
-intended for the entire Carvel suite then please create the proposal at the root
-of the `proposals` directory (for example, `./010-carvel-cli/`).
+project with a terse name (for example, `ytt/001-schemas/`). If the proposal
+concerns multiple projects or is intended for the entire Carvel suite then
+please create the proposal at the root of the `proposals` directory (for
+example, `./010-carvel-cli/`).
 
-In that directory, create a `README.md` containing the core proposal. Include other files (e.g. sets of example artifacts, if necessary) to help support understanding of the feature.
-When creating the proposal, please add a `Status: Draft` line at the top of the
-proposal to indicate its state.
+In that directory, create a `README.md` containing the core proposal. Include
+other files (e.g. sets of example artifacts, if necessary) to help support
+understanding of the feature.  When creating the proposal, please add a `Status:
+Draft` line at the top of the proposal to indicate its state.
 
 ## Proposal Template
 The below template is an example. Other than the high-level details (such as
@@ -75,7 +86,7 @@ and the design of the proposed solution.
 | Accepted | The proposal has been accepted by the project maintainers. |
 | Rejected | The proposal has been rejected by the project maintainers. |
 
-## Lifecycle of a Proposal
+# Lifecycle of a Proposal
 1. Author adds a proposal by creating a PR in draft mode. (Authors can save their work until ready.)
 1. When the author elaborates the proposal sufficiently to withstand critique they:
    1. change the status to `in-review` and
