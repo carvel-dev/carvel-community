@@ -3,7 +3,7 @@ title: Accept Unannotated YAML as Data Values
 authors: 
 - John Ryan <ryanjo@vmware.com>
 - Steven Locke <slocke@vmware.com>
-status: draft
+status: in-review
 approvers: 
 - Dmitriy Kalinin <dkalinin@vmware.com>
 - Eli Wrenn <ewrenn@vmware.com>
