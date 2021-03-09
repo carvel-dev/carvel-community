@@ -21,7 +21,6 @@ make the most sense for your proposal.
 
 ```md
 ---
-id: 1
 title: "Writing a Proposal"
 authors: [ "Aaron Hurley <ahurley@vmware.com>" ]
 status: "draft"
