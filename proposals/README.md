@@ -2,7 +2,7 @@
 This directory serves as the home for Carvel proposals. A proposal is a design
 document that describes a new feature for a Carvel project. The new feature
 can span multiple projects or introduce a new project. 
-A proposal must be sponsored by at least one Carvel Maintainer.  Proposals can be worked by anyone in the community.
+A proposal must be sponsored by at least one Carvel maintainer.  Proposals can be worked by anyone in the community.
 
 # Submit a Proposal
 To create a proposal, submit a PR to this directory under the appropriate
@@ -77,14 +77,12 @@ and the design of the proposed solution.
 | Rejected | The proposal has been rejected by the project maintainers. |
 
 ## Lifecycle of a Proposal
-1. Author adds a Proposal by:
-   - creating a PR (in draft mode). (in this they can save their work until ready)
-2. When the Author elaborates the proposal sufficiently to withstand critique they:
-   - change the status to `in-review` and
-   - mark the PR as "Ready for Review"
-3. The community critiques the proposal (mature/converge it) by:
-   - adding PR reviews.
-4. When the Approvers reach [rough consensus](https://en.wikipedia.org/wiki/Rough_consensus), they:
-   - change the status to `accepted` or `rejected`,
-   - record both majority and dissenting opinions, and
-   - merge the PR.
+1. Author adds a proposal by creating a PR in draft mode. (Authors can save their work until ready.)
+1. When the author elaborates the proposal sufficiently to withstand critique they:
+   1. change the status to `in-review` and
+   1. mark the PR as "Ready for Review"
+1. The community critiques the proposal by adding PR reviews in order to mature/converge on the proposal.
+1. When the approvers reach [rough consensus](https://en.wikipedia.org/wiki/Rough_consensus), they:
+   1. change the status to `accepted` or `rejected`,
+   1. record both majority and dissenting opinions, and
+   1. merge the PR.
