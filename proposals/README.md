@@ -22,7 +22,7 @@ make the most sense for your proposal.
 ```md
 ---
 id: 1
-title: "Writing a HIP"
+title: "Writing a Proposal"
 authors: [ "Aaron Hurley <ahurley@vmware.com>" ]
 status: "draft"
 approvers: [ "Cari Dean <cdean@vmware.com", "Dmitriy Kalinin <dkalinin@vmware.com>" ]
