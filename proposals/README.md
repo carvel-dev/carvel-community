@@ -69,9 +69,22 @@ The goal of the review is to gain an understanding of the problem being solved
 and the design of the proposed solution.
 
 # Proposal States
-| State | Definition |
+| Status | Definition |
 | --- | --- |
 | Draft | The proposal is actively being written by the proposer. |
 | In Review | The proposal is being reviewed by project maintainers. |
 | Accepted | The proposal has been accepted by the project maintainers. |
 | Rejected | The proposal has been rejected by the project maintainers. |
+
+## Lifecycle of a Proposal
+1. Author adds a Proposal by:
+   - creating a PR (in draft mode). (in this they can save their work until ready)
+2. When the Author elaborates the proposal sufficiently to withstand critique they:
+   - change the status to `in-review` and
+   - mark the PR as "Ready for Review"
+3. The community critiques the proposal (mature/converge it) by:
+   - adding PR reviews.
+4. When the Approvers reach [rough consensus](https://en.wikipedia.org/wiki/Rough_consensus), they:
+   - change the status to `accepted` or `rejected`,
+   - record both majority and dissenting opinions, and
+   - merge the PR.
