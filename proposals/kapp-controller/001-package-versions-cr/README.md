@@ -38,12 +38,15 @@ will have the following structure:
 apiVersion: package.carvel.dev/v1alpha1
 kind: PackageVersions
 metadata:
-   name: <package-name>
+   name: <package's publicName>
    # non-namespaced since packages aren't namespaced
 spec:
-   availableVersions:
-   - 1.0.0
-   - 1.1.0
+   availableMajorVersions:
+   - version: 1.0.0
+     resourceName: <package resource name>
+   - version: 1.1.0
+     resourceName: <package resource name>
+   availablePrereleaseVersions:
    ...
 ```
 
@@ -53,19 +56,18 @@ will also be served by the packages aggregated api server. Additionally, the
 only supported API methods for the CR will be GET and LIST.
 
 The table output for this CR will show the package name as well as a small
-preview of available versions. To see the full list of available versions, users
-can describe the resource, or use the various output formats available via
-kubectl get.
+preview of available versions, both prerelease and major. To see the full list
+of available versions, users can describe the resource, or use the various
+output formats available via kubectl get.
 
 As part of the introduction of this CR, the LIST method for Package CRs will
-be removed and replaced with an error message suggesting the use of the
-PackageVersions list.
+be restricted to only allow use when search filters are provided.
 
 Table Format:
-```
-Name              Available Versions
-<package-name>    1.0.0, 1.1.0
-<package-name-2>  1.0.0, 1.1.0, 1.2.0, ... # if there are too many versions cut the list short
+```bash
+Name                      Latest Major Versions     Latest Prerelease Versions
+<package's public name>   1.0.0, 1.1.0
+<package2's public name>  1.0.0, 1.1.0, 1.2.0, ...  2.0.0-beta.4, 2.0.0-beta.3, ... # lists cut off. Users can see more via GET
 ```
 
 ### Other Approaches Considered
