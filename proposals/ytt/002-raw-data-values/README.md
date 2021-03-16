@@ -169,13 +169,20 @@ values:
 
 ### Specification
 
+#### Part One: yaml-data-values File Type
+
 `ytt` has an existing mechanism for indicating what type of file a given input is: [file marks](https://carvel.dev/ytt/docs/latest/file-marks/).
 
 Meet the specified needs by introducing another file type: `yaml-data-values`.
 
 This type extends the "family" of file types: `yaml-plain` and `yaml-template` which also provide the Consumer with the ability to override `ytt`'s inferred typing.
 
-Marking a file as `type:yaml-data-values` is equivalent to annotating it with `@data/values`.
+Marking a file as `type:yaml-data-values` is equivalent to annotating it:
+
+```yaml
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+```
 
 From the CLI:
 ```console
@@ -187,7 +194,10 @@ Within a Starlark program: _(this already exists, today)_
 library.with_data_values(...)
 ```
 
-#### Consideration: Imposed Restrictions on Marked Files
+In the case where the YAML documents in the supplied file are _already_ annotated as `@data/values`, including this file mark is no-op.
+
+
+##### Consideration: Imposed Restrictions on Marked Files
 
 `@data/values` _technically_ is a YAML Document-level annotation. Marking an entire file as "data values" means that _all_ YAML documents within it would be considered as such.  Notably, doing so conflicts with any future feature that aims to support Data Values co-existing with the templates that use them.
 
@@ -196,14 +206,14 @@ library.with_data_values(...)
 - as Schema matures, it would more likely be the kind of YAML document mixed with templates should such a structure truly want to be supported.
 
 
-#### Consideration: Array Items Requiring an @overlay/match
+##### Consideration: Array Items Requiring an @overlay/match
 
 Array items have traditionally required _some_ kind of matching as there was no default operation defined for them. This meant that overlays on documents that contained arrays could not be written without including such annotations.
 
 At the time of writing, a feature that extends the default merge operation to array items has _just_ been merged into `develop`. Therefore, for the base use-case, there are no annotations required.
 
 
-#### Consideration: Does not Support Replace Use-Case
+##### Consideration: Does not Support Replace Use-Case
 
 This option does not answer directly for other kinds of overlay operations besides merge. Of most notable concern is [Use Case: Array Replace](#use-case-array-replace): replacing the contents of an array that had a non-empty default value.
 
@@ -215,40 +225,77 @@ Given:
 We believe there is no need, at this time, to provide a convenience mechanism to affect any other than the default overlay operations on data values.
 
 
-### Other Approaches Considered
+##### Consideration: File Marks can be Ambiguous
 
-There was one other approach seriously considered: introducing a variety of the `--file` flag group.
+[@cppforlife](https://github.com/cppforlife) [noted](https://github.com/vmware-tanzu/carvel-community/pull/21#discussion_r591942769), that
 
-#### Introduce Files Argument for Data Values
+> file marks ... operate on relative path names
 
-`ytt` also sports the `--file...` family of command-line flags.
+This means that it is technically possible to unintentionally mark a file as `yaml-data-values`.
 
-Another option would be to extend that group of flags with `--file-data-values`.
+This "feature" is a behavior scoped to the File Mark mechanism, itself -- orthogonal to the behavior of this specific File Type.  Whatever is done to "fix" resolving those file references would address this concern.
 
-This syntax is more succinct and conceptually lighter than the file mark approach.
+The risk of deferring is low given how rare this case is:
+- the files must be identically named,
+- appear at the same relative path, and
+- one of the files should not be treated as a Data Values file.
 
-This approach two concepts: 
-1. one indicates a file for input using `-f`; and 
-2. one can customize that introduction using the `--file-data-values` so that _that_ file will be handled as a data values input.
+Therefore, we'll address this concern in a separate proposal.
 
-The file mark approach lights-up X concepts: 
-1. one indicates a file for input using `-f`; and 
-2. individual files implied by `--file` can be explicitly typed with "file marks"
-3. one kind of "file mark" is "type"; of those types, one of which is `yaml-data-values`
-4. to include an input as explicit a data values, it _both_ must be included in the set of files implied by the union of the `-f` inputs _and_ be explicitly marked with the `--file-mark '(path):type=yaml-data-values'` flag.
 
-That's a significant difference in cognitive load on the user.
 
-However, this approach couples two concerns: 
-- "typing" a file, i.e. marking it as containing YAML documents that are Data Values;
-- where in the ordering a file is processed.
+##### Consideration: Leaves Data Values Very Relaxed
 
-Furthermore, there already exists a flag named `--data-value-file`. This proposed flag would be confusingly similar.
+As proposed, this mechanism would fail to catch the case where a Configuration Consumer provides a key that is not previously defined in Data Values.
+
+However, given that -- at the time of writing -- development of the Schema mechanism is underway, it is reasonable to assume it would be generally available to properly restore such constraints on Data Values.
+
+
+#### Part Two: --data-values-file flag
+
+`ytt` also includes the `--data-value...` family of command-line flags.
+
+Another option would be to extend that group of flags with `--data-values-file`.
+
+For example:
+```
+$ ytt -f config/ --data-values-file ../special-env/my-values.yml
+```
+
+This would:
+- include `../special-env/my-values.yml` as a file in the relative root (i.e. in the root library), and
+- mark that file as type `yaml-data-values`.
+
+
+##### Consideration: Additional Optional Complexity
+
+Including this feature would add optional interface complexity:
+
+- there would be two ways to indicate a plain YAML file containing Data Values documents:
+  1. via the `type=yaml-data-values` file mark
+  2. via this flag
+- there would be two ways to include files for processing:
+  1. via the `--file` flag
+  2. via this special case of the `--data-value...` family of flag.
+- it introduces ambiguity from the interaction of those features:
+  - what does it mean to include a file both via a `--files` path and `--data-values-file`?
+  - should files included via `--data-values-file` be included in the `--files-inspect` output?
+
+
+On the other hand, this flag is more succinct and conceptually lighter than the file mark approach. It would make the (very common?) use-case of naming _the_ customizing input more accessible to a wide group of users.
+
+Does the convenience outweight the additional complexity?
 
 
 ## Open Questions
 
-1. 
+**Q1:** Does the convenience of `--data-values-file` outweight the optional complexity it brings?
+
+
+**Q2:** Does the success of this feature depend on resolving the ambiguity deficiency in File Marks?
+
+
+
 
 ## Answered Questions
 
