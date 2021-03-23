@@ -5,7 +5,17 @@ list, [follow these directions](#adding-your-organization-to-the-list-of-adopter
 
 ## Organizations using Carvel
 
-<a href="https://www.vmware.com" target="_blank"><img alt="VMware" src="logos/vmware.svg" height="50"></a>
+<a href="https://www.vmware.com" border="0" target="_blank"><img alt="VMware" src="logos/vmware.svg" height="50"></a>
+
+<a href="https://rev.ng/" border="0" target="_blank"><img alt="Revng" src="logos/revng.svg" height="50"></a>
+
+## Solutions built with Carvel
+
+Below is a list of solutions where Carvel is being used as a component.
+
+**[Revng](https://rev.ng/)**
+
+Revng is a small company with expertise in compilers, emulation and binary analysis. They use ytt as a flexible templating tool to generate the configuration for [orchestra](https://github.com/revng/orchestra), their meta build system/package manager.
 
 ## Adding your organization to the list of adopters
 
