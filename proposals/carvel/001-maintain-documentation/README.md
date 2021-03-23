@@ -1,7 +1,7 @@
 ---
 title: "Maintaining Carvel Documentation"
 authors: [ "John Ryan <ryanjo@vmware.com>" ]
-status: "draft"
+status: "in-review"
 approvers: [ "Aaron Hurley <ahurley@vmware.com>", "Helen George <hskgeo@vmware.com>", "Vibhas Kumar <vibkumar@vmware.com>"]
 ---
 
@@ -24,13 +24,24 @@ Currently, the Carvel teams maintain a single version of documentation for each 
 **What's needed is a consistent scheme for maintaining our set of documentation that is easy to navigate, easy to search, and easy to maintain — across a range of versions of our tools.**
 
 
-current experience to motivate the proposed change._
-
 ## Terminology / Concepts
 
 - version caveat — a note or parenthetical that indicates that the behavior of some feature changed around a specific version.
 
 ## Proposal
+
+- [Goals and Non-goals](#goals-and-non-goals)
+- [Specification / Use Cases](#specification--use-cases)
+  - [Freezing a Documentation Set](#freezing-a-documentation-set)
+  - [Use Case: Carvel Team Deprecates a Feature](#use-case-carvel-team-deprecates-a-feature)
+  - [Use Case: Carvel Team Releases a Patch of an Existing Release](#use-case-carvel-team-releases-a-patch-of-an-existing-release)
+  - [Use Case: User Navigates into Documentation (current version)](#use-case-user-navigates-into-documentation-current-version)
+  - [Use Case: User Follows a Deep Link into Documentation (previous version)](#use-case-user-follows-a-deep-link-into-documentation-previous-version)
+  - [Use Case: User Searches within Documentation](#use-case-user-searches-within-documentation)
+  - [Consideration: Playgrounds](#consideration-playgrounds)
+- [Other Approaches Considered](#other-approaches-considered)
+  - [Two Versions of Documentation](#two-versions-of-documentation)
+  - [Multiple Live Versions of Documentation](#multiple-live-versions-of-documentation)
 
 ### Goals and Non-goals
 
@@ -70,6 +81,7 @@ When a version of documentation is "frozen" it means:
   up-to-date documentation, see the latest version.
   ```
 - once a version is frozen, as a breakable "rule" no edits are made to it.
+
 
 #### Use Case: Carvel Team Deprecates a Feature
 
@@ -113,7 +125,7 @@ In order to avoid a whole class of undesired user experiences (such as being giv
 
 #### Consideration: Playgrounds
 
-There will be only one version of the playground: the latest released.
+There will be only one version of playground(s): the latest released.
 
 
 ### Other Approaches Considered
@@ -125,15 +137,23 @@ Another approach is to maintain exactly two versions of documentation:
 2. `develop` — corresponding to the version under development.
 
 In effect, this is the "One Version" approach with a tweak: 
+- that all new work is done in the `develop` version;
+- when a new version of the tool is released, `latest` is replaced with `develop`
+
+This approach continues to use "version caveat"s in order to convey what features are available in what version of the tool.  It's this exact attendant cognitive load that we wish to reduce for readers/users.
 
 
-#### Multiple Versions of Documentation
+#### Multiple Live Versions of Documentation
 
+We considered an approach where not only would we maintain the `latest`, but all previous versions of documentation to keep up their utility.
+
+This approach was quickly rejected as the maintenance effort significantly outweighs the value of servicing multiple versions.
 
 ## Open Questions
-
-**Q1** _Can our website search engine be configured to only index the latest documentation?_
 
 **Q2** 
 
 ## Answered Questions
+
+**Q1** _Can our website search engine be configured to only index the latest documentation?_ \
+**A1** Yes. For example, a tag facet can be added for each version in addition to the tool name.
