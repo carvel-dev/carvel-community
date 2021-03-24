@@ -15,7 +15,7 @@ Below is a list of solutions where Carvel is being used as a component.
 
 **[Revng](https://rev.ng/)**
 
-Revng is a small company with expertise in compilers, emulation and binary analysis. They use ytt as a flexible templating tool to generate the configuration for [orchestra](https://github.com/revng/orchestra), their meta build system/package manager.
+Revng is a small company with expertise in compilers, emulation and binary analysis. Revng uses ytt as a flexible templating tool to generate the configuration for [orchestra](https://github.com/revng/orchestra), their meta build system/package manager.
 
 ## Adding your organization to the list of adopters
 
