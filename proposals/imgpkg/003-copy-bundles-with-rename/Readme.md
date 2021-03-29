@@ -46,10 +46,10 @@ executing the copy between registries to have more control over the location whe
 
 ## Terminology / Concepts
 
+- **OCI**: Open Container Initiative, [the official website](https://opencontainers.org/)
 - **Repositories**: Place inside a Registry where an OCI Image is located
 - **Registry**: Server that will be used to store and retrieve OCI Images (ex: goharbor.io(on prem), gcr.io(cloud),
   hub.docker.io(cloud))
-- **OCI**: Open Container Initiative, [the official website](https://opencontainers.org/)
 - **API**: Application Programming Interface, in this proposal case we will refer to YAML configuration as API
 - **Bundle**: OCI Image that contains configuration and OCI Images, for more information
   the [original proposal](https://github.com/vmware-tanzu/carvel/blob/develop/proposals/imgpkg/001-bundles/README.md)
