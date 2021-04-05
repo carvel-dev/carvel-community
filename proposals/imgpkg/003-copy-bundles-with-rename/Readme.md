@@ -47,9 +47,11 @@ executing the copy between registries to have more control over the location whe
 ## Terminology / Concepts
 
 - **OCI**: Open Container Initiative, [the official website](https://opencontainers.org/)
-- **Repositories**: Place inside a Registry where an OCI Image is located
 - **Registry**: Server that will be used to store and retrieve OCI Images (ex: goharbor.io(on prem), gcr.io(cloud),
   hub.docker.io(cloud))
+- **Repositories**: Place inside a Registry where an OCI Image is located
+- **Namespace**: It is the part of the Repository that does not include the Image Name. (ex: `gcr.io/some/path/img`
+  the Namespace is `some/path/`)
 - **API**: Application Programming Interface, in this proposal case we will refer to YAML configuration as API
 - **Bundle**: OCI Image that contains configuration and OCI Images, for more information
   the [original proposal](https://github.com/vmware-tanzu/carvel/blob/develop/proposals/imgpkg/001-bundles/README.md)
@@ -310,10 +312,10 @@ mappingFunctionYttStar: |
     registry = 'my.private-registry.io/'
     if regexMatch(image, '.*image1.*')
       return registry + 'myname/exact-app'
-    elif repository(image) == 'other-image'
+    elif imageName(image) == 'other-image'
       return registry + 'some-other-repo'
     end
-    return registry + repository(image)
+    return registry + imageName(image)
   end
 ```
 
@@ -357,23 +359,40 @@ Return: Registry URL
 - `registry('gcr.io/some/deep/path/my-image@sha256:aaaaaaaa')` will return `gcr.io`
 - `registry('gcr.io/some/deep/path/my-image:some-tag')` will return `gcr.io`
 
-##### repository
+##### imageName
 
-Function will remove all information from an OCI Image location and return the Repository name.
+Function will remove all information from an OCI Image location and return the Image name.
 
-Definition: `def repository(image) -> string`
+Definition: `def imageName(image) -> string`
 
 Parameters:
 
 - `image` string with the Registry + Repository of the OCI Image
 
-Return: Repository name
+Return: Image name
 
 **Examples:**
 
-- `repository('https://index.docker.io/u/ubuntu@sha256:aaaaaaaa')` will return `ubuntu`
-- `repository('gcr.io/some/deep/path/my-image@sha256:aaaaaaaa')` will return `my-image`
-- `repository('gcr.io/some/deep/path/my-image:some-tag')` will return `my-image`
+- `imageName('https://index.docker.io/u/ubuntu@sha256:aaaaaaaa')` will return `ubuntu`
+- `imageName('gcr.io/some/deep/path/my-image@sha256:aaaaaaaa')` will return `my-image`
+- `imageName('gcr.io/some/deep/path/my-image:some-tag')` will return `my-image`
+
+##### namespace
+
+Function will remove the Registry information as well as the Image Name and return the Namespace information.
+
+Definition: `def namespace(image) -> string`
+
+Parameters:
+
+- `image` string with the Registry + Repository of the OCI Image
+
+Return: Namespace
+
+**Examples:**
+
+- `namespace('https://index.docker.io/u/ubuntu@sha256:aaaaaaaa')` will return ``
+- `namespace('gcr.io/some/deep/path/my-image@sha256:aaaaaaaa')` will return `some/deep/path`
 
 ##### matchTag
 
@@ -641,10 +660,10 @@ mappingFunctionYttStar: |
     registry = 'my.private-registry.io/'
     if regexMatch(image, '.*image1.*')
       return registry + 'myname/exact-app'
-    elif repository(image) == 'other-image'
+    elif imageName(image) == 'other-image'
       return registry + 'some-other-repo'
     end
-    return registry + repository(image)
+    return registry + imageName(image)
   end
 ```
 
