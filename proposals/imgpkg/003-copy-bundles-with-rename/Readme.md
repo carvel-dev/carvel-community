@@ -519,8 +519,8 @@ with no overrides.
 **How might `imgpkg` help to accomplish this Use Case:**
 
 - Maintaining annotations provided in ImagesLock
-- Allow the user to customize the copy of OCI Images to match a naming convention that could help the user identify the
-  original OCI Image using only the Repository name
+- Allow the user to customize the Destination Repository when copying OCI Images to match a naming convention that could
+  help the user identify the original OCI Image using only the Repository name
 - Ensure that tags present in the ImagesLock folder are maintained when OCI Images are copied
 
 #### As a User When I can copy a Bundle to my local Registry to run one of the OCI Images
@@ -535,8 +535,8 @@ with no overrides.
 
 **How might `imgpkg` help to accomplish this Use Case:**
 
-- Allow the user to customize the copy of OCI Images to match a naming convention that could help the user identify the
-  original OCI Image using only the Repository name
+- Allow the user to customize the Destination Repository when copying OCI Images to match a naming convention that could
+  help the user identify the original OCI Image using only the Repository name
 - Ensure that tags present in the ImagesLock folder are maintained when OCI Images are copied
 
 #### As a User When I look at the OCI Images in a Registry I am able to easily understand what each OCI Images is used for
@@ -547,8 +547,8 @@ with no overrides.
 
 **How might `imgpkg` help to accomplish this Use Case:**
 
-- Allow the user to customize the copy of OCI Images to match a naming convention that could help the user identify the
-  original OCI Image using only the Repository name
+- Allow the user to customize the Destination Repository when copying OCI Images to match a naming convention that could
+  help the user identify the original OCI Image using only the Repository name
 - Ensure that tags present in the ImagesLock folder are maintained when OCI Images are copied
 
 #### As a User When I have a Bundle with a big number of OCI Images I want to be able to create the CopyConfig file easily
