@@ -487,7 +487,7 @@ Field explanation:
 - `images[].location` (required; string) Is the location where this OCI Image was copied to.
 
 When copying a Bundle between Registries and/or Repositories this new OCI Image will be created in the destination
-Repository and will be tagged with the tag `sha256-{Bundle SHA}-imgpkg.locations`. This is not a perfect solution since
+Repository and will be tagged with the tag `sha256-{Bundle SHA}.imgpkg.locations`. This is not a perfect solution since
 Tags are mutable, but this will fix the problem for now.
 
 ##### Caveat
