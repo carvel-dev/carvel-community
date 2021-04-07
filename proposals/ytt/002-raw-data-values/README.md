@@ -100,9 +100,9 @@ The Configuration Author intends to provide a simple Out of The Box experience b
 The Configuration Consumer needs to _overwrite_ any existing config, rather than merge.
 
 In this case:
-- schema defines the full set of Data Values with reasonable defaults.
-- one or more arrays in the schema is non-empty
-- Consumer-supplied Data values includes values for one or more of those non-empty arrays.
+- schema defines the full set of Data Values with reasonable defaults;
+- one or more arrays in the schema are non-empty;
+- Consumer-supplied Data values include one or more non-empty arrays.
 
 **Authored Inputs:**
 
@@ -164,7 +164,7 @@ values:
 - Avoid introducing situation-specific mechanisms.
 
 **Non-Goals**
-- Provide a way to edit data values from the command-line with feature-parity of overlay annotations.
+- Provide a way to edit data values from the command-line that is feature-parity with overlay annotations.
 
 
 ### Specification
@@ -190,7 +190,7 @@ $ ytt -f . --file-mark='values.yml:type=yaml-data-values'
 ```
 
 Within a Starlark program: _(this already exists, today)_
-```python
+```starlark
 library.with_data_values(...)
 ```
 
@@ -202,8 +202,7 @@ In the case where the YAML documents in the supplied file are _already_ annotate
 `@data/values` _technically_ is a YAML Document-level annotation. Marking an entire file as "data values" means that _all_ YAML documents within it would be considered as such.  Notably, doing so conflicts with any future feature that aims to support Data Values co-existing with the templates that use them.
 
 - currently, `ytt` disallows any other kind of document in a given file. So, this restriction is -- in practice -- not new.
-- this "constraint" is limited to _only_ files explicitly marked in this fashion.
-- as Schema matures, it would more likely be the kind of YAML document mixed with templates should such a structure truly want to be supported.
+- this "constraint" would be scoped to _only_ files explicitly file-marked as described
 
 
 ##### Consideration: Array Items Requiring an @overlay/match
@@ -222,7 +221,7 @@ Given:
 - in the rare case where a Configuration Consumer _does_ wish to customize the processing of their data values, they have the full power of `ytt`'s Overlay features available to them.
 - in the specific case of replacing the contents of an array, this amounts to understanding one (1) annotation: `@overlay/replace`.
 
-We believe there is no need, at this time, to provide a convenience mechanism to affect any other than the default overlay operations on data values.
+Given these factors, we believe there is no need, at this time, to provide a convenience mechanism to affect any other than the default overlay operations on data values.
 
 
 ##### Consideration: File Marks can be Ambiguous
@@ -235,30 +234,17 @@ This means that it is technically possible to unintentionally mark a file as `ya
 
 This "feature" is a behavior scoped to the File Mark mechanism, itself -- orthogonal to the behavior of this specific File Type.  Whatever is done to "fix" resolving those file references would address this concern.
 
-The risk of deferring is low given how rare this case is:
-- the files must be identically named,
-- appear at the same relative path, and
-- one of the files should not be treated as a Data Values file.
-
-Therefore, we'll address this concern in a separate proposal.
-
-
-
-##### Consideration: Leaves Data Values Very Relaxed
-
-As proposed, this mechanism would fail to catch the case where a Configuration Consumer provides a key that is not previously defined in Data Values.
-
-However, given that -- at the time of writing -- development of the Schema mechanism is underway, it is reasonable to assume it would be generally available to properly restore such constraints on Data Values.
+Therefore, we'll address this concern in [a separate proposal](https://github.com/vmware-tanzu/carvel-ytt/discussions/326).
 
 
 #### Part Two: --data-values-file flag
 
 `ytt` also includes the `--data-value...` family of command-line flags.
 
-Another option would be to extend that group of flags with `--data-values-file`.
+We could extend that group of flags with `--data-values-file`.
 
 For example:
-```
+```console
 $ ytt -f config/ --data-values-file ../special-env/my-values.yml
 ```
 
@@ -266,36 +252,34 @@ This would:
 - include `../special-env/my-values.yml` as a file in the relative root (i.e. in the root library), and
 - mark that file as type `yaml-data-values`.
 
+It is the equivalent of:
+
+```console
+$ ytt -f config/ -f ../special-env/my-values.yml --file-mark 'my-values.yml:type=data-values'
+```
+
 
 ##### Consideration: Additional Optional Complexity
 
-Including this feature would add optional interface complexity:
+Including this feature would add [optional interface complexity](http://www.catb.org/~esr/writings/taoup/html/ch13s01.html#id2961759):
 
 - there would be two ways to indicate a plain YAML file containing Data Values documents:
   1. via the `type=yaml-data-values` file mark
   2. via this flag
-- there would be two ways to include files for processing:
+- there would be two ways to include files for processing from two different groups of flags:
   1. via the `--file` flag
   2. via this special case of the `--data-value...` family of flag.
-- it introduces ambiguity from the interaction of those features:
-  - what does it mean to include a file both via a `--files` path and `--data-values-file`?
-  - should files included via `--data-values-file` be included in the `--files-inspect` output?
+- there's another flag with the same words in a different order: `--file-data-values`, for the user with less than complete familiarity with the tool, it can be easy to get these two flags mixed up (noted [in this review](https://github.com/vmware-tanzu/carvel-community/pull/21#discussion_r589724130)).
 
-
-On the other hand, this flag is more succinct and conceptually lighter than the file mark approach. It would make the (very common?) use-case of naming _the_ customizing input more accessible to a wide group of users.
-
-Does the convenience outweight the additional complexity?
+On the other hand, this flag would be particularly convenient. It is more succinct and conceptually lighter than the file mark approach. It would make the (very common?) use-case of naming _the_ customizing input more accessible to a wide group of users.
 
 
 ## Open Questions
 
-**Q1:** Does the convenience of `--data-values-file` outweight the optional complexity it brings?
-
-
-**Q2:** Does the success of this feature depend on resolving the ambiguity deficiency in File Marks?
-
-
+**Q1:** Does the convenience of `--data-values-file` outweigh the optional complexity it brings?
 
 
 ## Answered Questions
 
+**Q2:** Does the success of this feature depend on resolving the ambiguity deficiency in File Marks?
+**A2:** Yes. Not doing so will be particularly surprising, rather hard to detect the source, and produces incorrect results.
