@@ -239,6 +239,9 @@ overrides:
 
 **Note:** `overrides` key cannot be present in the configuration if the key `mappingFunctionYttStar` is also defined
 
+**Note2:** If 2 different registries are provided as overrides destination `imgpkg` should not proceed and should
+display an error
+
 ##### Assumptions
 
 - In the beginning, a few possible overrides will be provided, eventually only the exact match one
@@ -320,6 +323,9 @@ mappingFunctionYttStar: |
 ```
 
 **Note:** `mappingFunctionYttStar` key cannot be present in the configuration if the key `overrides` is also defined
+
+**Note2:** If 2 different registries are provided as overrides destination `imgpkg` should not proceed and should
+display an error
 
 The mapping function will have to respect the following definition `process(string) -> string`.
 
@@ -742,10 +748,6 @@ mappingFunctionYttStar: |
 - Can we in a first approach just provide a command-line flag to change strategies?
     - Would this reduce the total amount of complexity of this feature?
 
-- Should copying OCI Images to different Registries be allowed?
-
-  My initial inclination is to do not allow and even raise an error if the Registries do not match.
-
 ## Answered Questions
 
 - How will `imgpkg` know where to find the OCI Images after they are copied?
@@ -778,3 +780,9 @@ mappingFunctionYttStar: |
 
   **Answer:** Created [the section Implementation Breakdown](#implementation-breakdown) to try to split the work into
   manageable phases
+
+- Should copying OCI Images to different Registries be allowed?
+
+  My initial inclination is to do not allow and even raise an error if the Registries do not match.
+
+  **Answer:** We should not allow different Registries in the Overrides section
