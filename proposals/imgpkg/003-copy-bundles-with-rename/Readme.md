@@ -119,9 +119,9 @@ kind: CopyConfig
 strategy: SingleRepository
 overrides:
   - imageRepo: public-reg.io/simple-app
-    destination: my.private-registry.io/myname/simple-app
+    destinationRepo: myname/simple-app
   - image: public-reg.io/exact-app@sha256:aaaaaaa
-    destination: my.private-registry.io/myname/exact-app
+    destinationRepo: myname/exact-app
 ```
 
 Fields:
@@ -168,7 +168,7 @@ kind: CopyConfig
 strategy: SingleRepository
 overrides:
   - image: public-reg.io/exact-app@sha256:aaaaaaa
-    destination: my.private-registry.io/myname/exact-app
+    destinationRepo: myname/exact-app
 ```
 
 The above configuration will ensure that the OCI Image `public-reg.io/exact-app@sha256:aaaaaaa` will be copied
@@ -213,7 +213,7 @@ kind: CopyConfig
 strategy: MaintainOriginRepository
 overrides:
   - image: public-reg.io/exact-app@sha256:aaaaaaa
-    destination: my.private-registry.io/myname/exact-app
+    destinationRepo: myname/exact-app
 ```
 
 For other options of matching check the [Overrides section](#overrides)
@@ -232,15 +232,12 @@ In the following example the `exact-app` OCI Image will be copied to `my.private
 ```yaml
 overrides:
   - image: public-reg.io/exact-app@sha256:aaaaaaa
-    destination: my.private-registry.io/myname/exact-app
+    destinationRepo: myname/exact-app
   - imageRepo: public-reg.io/exact-app
-    destination: my.private-registry.io/image/will/not/be/copied/here
+    destinationRepo: image/will/not/be/copied/here
 ```
 
 **Note:** `overrides` key cannot be present in the configuration if the key `mappingFunctionYttStar` is also defined
-
-**Note2:** If 2 different registries are provided as overrides destination `imgpkg` should not proceed and should
-display an error
 
 ##### Assumptions
 
@@ -250,27 +247,27 @@ display an error
 ##### Exact match
 
 This overrides will do an exact match of the OCI Image present in `.imgpkg/images.yml` and will copy the OCI Image to
-the Repository that is provided in the `destination` field
+the Repository that is provided in the `destinationRepo` field
 
 Schema fields:
 
 - `image` (required; string) Registry,Repository and Tag or SHA that will be used to do an exact match. This can be an
   OCI Image with a Tag or a SHA. (ex: `my.registry.io/img@sha256:aaaaaa` or `my.registry.io/img:my-tag`)
-- `destination` (required; string) Registry and Repository the OCI Image will be copied to. This field can only contain
-  Registry+Repository.
+- `destinationRepo` (required; string) Namespace and Repository the OCI Image will be copied to. This field can only
+  contain Namespace+Repository, where the Namespace is optional (not all registries support it)
 
 Example of the override using a SHA
 
 ```yaml
 image: public-reg.io/exact-app@sha256:aaaaaaa
-destination: my.private-registry.io/myname/exact-app
+destinationRepo: myname/exact-app
 ```
 
 Example of override using a Tag
 
 ```yaml
 image: public-reg.io/exact-app:some-tag
-destination: my.private-registry.io/myname/exact-app
+destinationRepo: myname/exact-app
 ```
 
 In the case of exact matching with tag `imgpkg` will have to do the matching using both the Registry+Repository and the
@@ -285,14 +282,14 @@ equal, no wildcards allowed.
 Schema fields:
 
 - `imageRepo` (required; string) OCI Image that will be used to do an exact match on Registry and Repository.
-- `destination` (required; string) Registry and Repository the OCI Image will be copied to. This field can only contain
-  Registry+Repository.
+- `destinationRepo` (required; string) Registry and Repository the OCI Image will be copied to. This field can only
+  contain Namespace+Repository, where the Namespace is optional (not all registries support it)
 
 Example of the override
 
 ```yaml
 imageRepo: public-reg.io/simple-app
-destination: my.private-registry.io/myname/simple-app
+destinationRepo: myname/simple-app
 ```
 
 Result:
@@ -312,20 +309,16 @@ kind: CopyConfig
 strategy: MaintainOriginRepository
 mappingFunctionYttStar: |
   def process(image):
-    registry = 'my.private-registry.io/'
     if regexMatch(image, '.*image1.*')
-      return registry + 'myname/exact-app'
+      return 'myname/exact-app'
     elif imageName(image) == 'other-image'
-      return registry + 'some-other-repo'
+      return 'some-other-repo'
     end
-    return registry + imageName(image)
+    return imageName(image)
   end
 ```
 
 **Note:** `mappingFunctionYttStar` key cannot be present in the configuration if the key `overrides` is also defined
-
-**Note2:** If 2 different registries are provided as overrides destination `imgpkg` should not proceed and should
-display an error
 
 The mapping function will have to respect the following definition `process(string) -> string`.
 
@@ -692,9 +685,9 @@ kind: CopyConfig
 strategy: (SingleRepository|MaintainOriginRepository)
 overrides:
   - imageRepo: public-reg.io/simple-app
-    destination: my.private-registry.io/myname/simple-app
+    destinationRepo: myname/simple-app
   - image: public-reg.io/exact-app@sha256:aaaaaaa
-    destination: my.private-registry.io/myname/exact-app
+    destinationRepo: myname/exact-app
 ```
 
 Overrides available:
@@ -724,13 +717,12 @@ kind: CopyConfig
 strategy: (SingleRepository|MaintainOriginRepository)
 mappingFunctionYttStar: |
   def process(image):
-    registry = 'my.private-registry.io/'
     if regexMatch(image, '.*image1.*')
-      return registry + 'myname/exact-app'
+      return 'myname/exact-app'
     elif imageName(image) == 'other-image'
-      return registry + 'some-other-repo'
+      return 'some-other-repo'
     end
-    return registry + imageName(image)
+    return imageName(image)
   end
 ```
 
