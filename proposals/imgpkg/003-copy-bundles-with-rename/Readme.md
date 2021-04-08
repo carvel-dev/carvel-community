@@ -67,9 +67,9 @@ When a user copies a bundle between registries `imgpkg` copies all the OCI Image
 same repository. This solution was adopted to protect copy functionality from the following problems:
 
 - Multiple images that have the same Repository Name but are not the same. Assuming we have 2 bundles one that contains
-  the image  `my.repo.io/controller@sha256:aaaa` and another that contains the
-  image `other.repo.io/controller@sha256:bbbb`, when we copy both images to the registry `third.repo.io` they would be
-  copied to `third.repo.io/controller@sha256:aaaa` and `third.repo.io/controller@sha256:bbbb` respectively. This can
+  the image  `my.registry.io/controller@sha256:aaaa` and another that contains the
+  image `other.registry.io/controller@sha256:bbbb`, when we copy both images to the registry `third.registry.io` they would be
+  copied to `third.registry.io/controller@sha256:aaaa` and `third.registry.io/controller@sha256:bbbb` respectively. This can
   confuse because even though now they share the same Repository they are completely different Images from 2 completely
   different Source Codes. This might cause problems for Registry Administrators when they try to understand what each
   Repository contains.
@@ -79,7 +79,7 @@ same repository. This solution was adopted to protect copy functionality from th
   information about the original OCI Image that can be significant.
 - Copying OCI Images to different repositories can require different user or authentication. When copying an OCI Image
   to a particular Repository the user needs to have credentials to do so, in a scenario where the
-  repository `my.repo.io/controller` was previously created by a different user, the current user might not have
+  repository `my.registry.io/controller` was previously created by a different user, the current user might not have
   permission to copy the new OCI Image to that particular Repository.
 - ECR requires users to create a Repository before pushing OCI
   Images. [reference](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html)
@@ -252,7 +252,7 @@ the Repository that is provided in the `destination` field
 Schema fields:
 
 - `image` (required; string) Registry,Repository and Tag or SHA that will be used to do an exact match. This can be an
-  OCI Image with a Tag or a SHA. (ex: `my.repo.io/img@sha256:aaaaaa` or `my.repo.io/img:my-tag`)
+  OCI Image with a Tag or a SHA. (ex: `my.registry.io/img@sha256:aaaaaa` or `my.registry.io/img:my-tag`)
 - `destination` (required; string) Registry and Repository the OCI Image will be copied to. This field can only contain
   Registry+Repository.
 
@@ -557,7 +557,7 @@ with no overrides.
 
 - New command that generates a configuration file from a Bundle
 
-  `imgpkg tools generate copy-config -b repo.io/bundle@sha256:aaaaaa -o /tmp/copy-config.yml`
+  `imgpkg tools generate copy-config -b registry.io/bundle@sha256:aaaaaa -o /tmp/copy-config.yml`
 
 ### Implementation breakdown
 
