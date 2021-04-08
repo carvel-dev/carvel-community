@@ -442,7 +442,7 @@ found next
    `imgpkg push -b yet.another.registry.io/nested-bundle-2 -f folder1`
 
 1. Copy `yet.another.registry.io/nested-bundle-2` to the Registry `other.registry.io`
-   `imgpkg copy -b yet.another.registry.io/nested-bundle-2@sha256:bbbbbbbbbb --to-repo other.registry.io/main-bundle`
+   `imgpkg copy -b yet.another.registry.io/nested-bundle-2@sha256:bbbbbbbbbb --to-repo other.registry.io/nested-bundle-2`
 
 1. Create `other.registry.io/main-bundle`
 
@@ -465,7 +465,7 @@ found in the following places:
 - world.io/img3@sha256:aaaaaaaaaa
 - Or any other place the OCI Image was copied to using a strategy in this proposal
 
-To try to address this problem we can create a new OCI Image that contains 1 layer with 1 file
+To try to address this problem we can create a new OCI Image that contains 1 layer with 1 file at the root
 called `images-locations.yml` that will have the following layout
 
 ```yaml
@@ -491,6 +491,18 @@ Field explanation:
 When copying a Bundle between Registries and/or Repositories this new OCI Image will be created in the destination
 Repository and will be tagged with the tag `sha256-{Bundle SHA}.imgpkg.locations`. This is not a perfect solution since
 Tags are mutable, but this will fix the problem for now.
+
+This file will contain the Locations for all the OCI Images of all the Nested Bundles. In the example above the file
+will contain 1 entry for each one of the following OCI Images:
+```
+other.registry.io/main-bundle
+another.registry.io/img2
+yet.another.registry.io/nested-bundle-2
+world.io/img3
+```
+
+**Note:** When doing `pull` and `copy` operations, `imgpkg` should rely only on the `ImagesLocation` file that is
+associated with the bundle that is being copied or pulled.
 
 ##### Caveat
 
