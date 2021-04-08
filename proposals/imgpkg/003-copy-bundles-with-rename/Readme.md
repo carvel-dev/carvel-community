@@ -68,11 +68,11 @@ same repository. This solution was adopted to protect copy functionality from th
 
 - Multiple images that have the same Repository Name but are not the same. Assuming we have 2 bundles one that contains
   the image  `my.registry.io/controller@sha256:aaaa` and another that contains the
-  image `other.registry.io/controller@sha256:bbbb`, when we copy both images to the registry `third.registry.io` they would be
-  copied to `third.registry.io/controller@sha256:aaaa` and `third.registry.io/controller@sha256:bbbb` respectively. This can
-  confuse because even though now they share the same Repository they are completely different Images from 2 completely
-  different Source Codes. This might cause problems for Registry Administrators when they try to understand what each
-  Repository contains.
+  image `other.registry.io/controller@sha256:bbbb`, when we copy both images to the registry `third.registry.io` they
+  would be copied to `third.registry.io/controller@sha256:aaaa` and `third.registry.io/controller@sha256:bbbb`
+  respectively. This can confuse because even though now they share the same Repository they are completely different
+  Images from 2 completely different Source Codes. This might cause problems for Registry Administrators when they try
+  to understand what each Repository contains.
 - Finding if an Image is already present in the destination repository is complicated.
 - Registries like `gcr.io` support paths in their Repositories while `hub.docker.io` does not. Copying an OCI Image
   from `gcr.io/my/specific/path/controller@sha256:aaaa` to `index.docker.io` is a challenge because we would lose
@@ -568,6 +568,7 @@ with no overrides.
   `imgpkg copy -b registry.io/bundle@sha256:aaaaaa -c strategy.yaml --to-repository other.registry.io/bundle --dry-run`
 
 This command should provide the following output
+
 ```
 Strategy: SingleRepository
 
