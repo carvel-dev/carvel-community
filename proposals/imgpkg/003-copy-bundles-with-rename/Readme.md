@@ -559,6 +559,25 @@ with no overrides.
 
   `imgpkg tools generate copy-config -b registry.io/bundle@sha256:aaaaaa -o /tmp/copy-config.yml`
 
+#### As a User When I am creating my overrides I want to see if they are correct before copying
+
+**How might `imgpkg` help to accomplish this Use Case:**
+
+- New flag on the copy command would provide this information
+
+  `imgpkg copy -b registry.io/bundle@sha256:aaaaaa -c strategy.yaml --to-repository other.registry.io/bundle --dry-run`
+
+This command should provide the following output
+```
+Strategy: SingleRepository
+
+Copying with rename will occur as following
+registry.io/bundle@sha256:113123 -> other.reg.io/copied-bundle@sha256:113123
+registry.io/img1@sha256:5555555 -> other.reg.io/copied-bundle@sha256:5555555
+index.docker.io/img2@sha256:666666 -> other.reg.io/copied-bundle@sha256:666666
+index.docker.io/img3@sha256:777777 -> other.reg.io/overrided-strategy@sha256:777777
+```
+
 ### Implementation breakdown
 
 This is quite a big proposal that can take some time to implement. In this section we try to split the current work
@@ -595,6 +614,7 @@ New Flags:
 
 - Copy command
     - `-c filename` and `--configuration filename` provide the configuration to select a strategy
+    - `--dry-run` outputs the copy strategy and the new OCI Images location without executing the copy
 
 API Implementation:
 At this point in time the user can only select a Copy Strategy that will apply to all OCI Images in the Bundle
