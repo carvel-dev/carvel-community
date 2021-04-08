@@ -478,9 +478,10 @@ called `images-locations.yml` that will have the following layout
 ```yaml
 apiVersion: imgpkg.carvel.dev/v1alpha1
 kind: ImagesLocation
+registry: yet.another.registry.io
 images:
   - image: world.io/img3@sha256:aaaaaaaaaa
-    location: yet.another.registry.io/nested-bundle-2
+    repository: nested-bundle-2
 ```
 
 Field explanation:
@@ -488,9 +489,11 @@ Field explanation:
 - `apiVersion` (required; string) Version of this configuration.
 - `kind` (required; `ImagesLocation`) Type of configuration, this value should always be `ImagesLocation`. Used to
   allow `imgpkg` to understand what type of configuration this document is defining
+- `registry` (required; string) Registry URL where the Bundle was copied
+  to. [For more information on the why, check this link](#registry-replication-considerations)
 - `images` (required; []array) Must contain on entry per OCI Images present in the ImagesLock file.
 - `images[].image` (required; string) This value MUST match an OCI Image defined in ImagesLock file for the Bundle.
-- `images[].location` (required; string) Is the location where this OCI Image was copied to.
+- `images[].repository` (required; string) Is the Namespace + Repository where this OCI Image was copied to.
 
 When copying a Bundle between Registries and/or Repositories this new OCI Image will be created in the destination
 Repository and will be tagged with the tag `sha256-{Bundle SHA}.imgpkg.locations`. This is not a perfect solution since
@@ -502,6 +505,43 @@ Since `imgpkg` would be using tags to find the new location for the OCI Images o
 guarantee that this tag is accurate. This should be considered a best effort to locate the OCI Images. When the tag is
 not present in the expected location `imgpkg` will assume that the Bundle was copied with `SingleRepository` strategy
 with no overrides.
+
+##### Searching order for OCI Image
+
+The priority order to find the Image location is:
+
+1. Bundle Registry URL + Location specified in the ImagesLocation configuration
+1. `registry` field from `ImagesLocation` + Location specified in the `ImagesLocation` configuration
+1. Bundle Registry URL + Bundle Location + @sha256:{Image SHA}
+   **Note:** We need to keep this possible location for retro compatibility.
+1. Location present in ImagesLock file
+
+**Note:** `copy` and `pull` will have to be able to implement the above search
+
+#### Registry replication considerations
+
+Given that Registries can define replication of OCI Images this can be a challenge to `imgpkg` because it relies on the
+Registry Location to find the Images. One example of this problem is:
+
+1. User creates a Bundle in registry.io/bundle
+1. User copies Bundle to private.registry.io/copied-bundle
+1. Registry is being replicated to other.registry.io
+1. User pulls Bundle from replicated Registry other.registry.io/copied-bundle
+
+At this point in time the OCI Image can be in
+
+- other.registry.io
+- private.registry.io
+- registry.io
+
+`imgpkg` only is aware of `registry.io` (the original location of the OCI Image) and `other.registry.io` (the location
+where the Bundle is being pulled)
+
+If the Registry URL to where the Bundle is copied is saved in the `ImagesLocation` file, `imgpkg`, would be able to know
+about the interim registry, allowing for a best effort find of all the OCI Images.
+
+**Note:** It is out of scope situations where not all OCI Images are relocated. `imgpkg` will try to do a best effort to
+find all the OCI Images for a particular Bundle using the order defined [here](#searching-order-for-oci-image).
 
 ### Use Cases
 
@@ -747,6 +787,11 @@ mappingFunctionYttStar: |
 
 - Can we in a first approach just provide a command-line flag to change strategies?
     - Would this reduce the total amount of complexity of this feature?
+
+- Can we save the SHA of the OCI Image in the ImagesLocation file instead of having the full Location as the key?
+
+  Something to consider while doing the implementation. Nevertheless if we decide to use the SHA we should change the
+  field `images[].image` to `images[].sha`.
 
 ## Answered Questions
 
