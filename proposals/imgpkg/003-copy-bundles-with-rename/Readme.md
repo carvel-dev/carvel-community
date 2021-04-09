@@ -473,7 +473,6 @@ called `images-locations.yml` that will have the following layout
 ```yaml
 apiVersion: imgpkg.carvel.dev/v1alpha1
 kind: ImagesLocation
-registry: yet.another.registry.io
 images:
   - image: world.io/img3@sha256:aaaaaaaaaa
     repository: nested-bundle-2
@@ -484,8 +483,6 @@ Field explanation:
 - `apiVersion` (required; string) Version of this configuration.
 - `kind` (required; `ImagesLocation`) Type of configuration, this value should always be `ImagesLocation`. Used to
   allow `imgpkg` to understand what type of configuration this document is defining
-- `registry` (required; string) Registry URL where the Bundle was copied
-  to. [For more information on the why, check this link](#registry-replication-considerations)
 - `images` (required; []array) Must contain on entry per OCI Images present in the ImagesLock file.
 - `images[].image` (required; string) This value MUST match an OCI Image defined in ImagesLock file for the Bundle.
 - `images[].repository` (required; string) Is the Namespace + Repository where this OCI Image was copied to.
@@ -544,9 +541,6 @@ At this point in time the OCI Image can be in
 
 `imgpkg` only is aware of `registry.io` (the original location of the OCI Image) and `other.registry.io` (the location
 where the Bundle is being pulled)
-
-If the Registry URL to where the Bundle is copied is saved in the `ImagesLocation` file, `imgpkg`, would be able to know
-about the interim registry, allowing for a best effort find of all the OCI Images.
 
 **Note:** It is out of scope situations where not all OCI Images are relocated. `imgpkg` will try to do a best effort to
 find all the OCI Images for a particular Bundle using the order defined [here](#searching-order-for-oci-image).
@@ -632,6 +626,18 @@ registry.io/img1@sha256:5555555 -> other.reg.io/copied-bundle@sha256:5555555
 index.docker.io/img2@sha256:666666 -> other.reg.io/copied-bundle@sha256:666666
 index.docker.io/img3@sha256:777777 -> other.reg.io/overrided-strategy@sha256:777777
 ```
+
+#### As a User When I am using a Replicated Registry I want to use OCI Images stored in the Replicated Registry
+
+**Goals**
+
+- Ensure OCI Images that are used on copy and pull are the ones the User Expects
+- When pull or copy the OCI Images will come from the source Registry or the Original location that is provided in the
+  ImagesLock file
+
+**How might `imgpkg` help to accomplish this Use Case:**
+
+- Ability to find the OCI Images that are part of the Bundle in the Replicated Registry
 
 ### Implementation breakdown
 
@@ -838,3 +844,11 @@ mappingFunctionYttStar: |
   My initial inclination is to do not allow and even raise an error if the Registries do not match.
 
   **Answer:** We should not allow different Registries in the Overrides section
+
+- Should `imgpkg` try to get OCI Images missing on a Replicated Registry from the Origin of the Replicated Registry
+
+  Example: `replica.registry.io` is a replica of `registry.io`
+  If the Bundle is present in `replica.registry.io` but one of the OCI Images is not, should `imgpkg` try to get the
+  Image from `registry.io`
+
+  **Answer:** No, unless the OCI Image original location (ImagesLock) is in `registry.io`
