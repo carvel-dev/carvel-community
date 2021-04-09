@@ -227,7 +227,9 @@ strategy defined.
 
 In the event that 2 Overrides match a particular OCI Image the first Override in the list takes precedence.
 
-In the following example the `exact-app` OCI Image will be copied to `my.private-registry.io/myname/exact-app`
+In the following example both overrides match the OCI Image, the first one is an exact match, and the second one is a
+match on Registry+Repository. Nevertheless `imgpkg` will not take into account any further matches after the first one.
+The OCI Image will be copied to `my.private-registry.io/myname/exact-app`.
 
 ```yaml
 overrides:
@@ -494,6 +496,7 @@ Tags are mutable, but this will fix the problem for now.
 
 This file will contain the Locations for all the OCI Images of all the Nested Bundles. In the example above the file
 will contain 1 entry for each one of the following OCI Images:
+
 ```
 other.registry.io/main-bundle
 another.registry.io/img2
