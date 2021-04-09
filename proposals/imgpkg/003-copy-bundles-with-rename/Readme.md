@@ -246,6 +246,21 @@ overrides:
 - In the beginning, a few possible overrides will be provided, eventually only the exact match one
 - The user cannot copy different OCI Images to different registries
 
+##### Destination field in overrides
+
+This field can be used in 2 different ways:
+
+1. the value starts with a `/`
+
+   When this is the case `destinationRepo: /here` the OCI Image will be copied to `registry.io/here`. `imgpkg` assumes
+   that the OCI Image should be copied to the root of the Registry
+
+1. the value does not start with `\`
+
+   When the Bundle is being copied to `registry.io/place/bundle` then the OCI Image will be copied
+   to `registry.io/place/img`. `imgpkg` assumes that the OCI Image will be copied to the same Registry and Namespace as
+   the Bundle.
+
 ##### Exact match
 
 This overrides will do an exact match of the OCI Image present in `.imgpkg/images.yml` and will copy the OCI Image to
@@ -516,10 +531,28 @@ with no overrides.
 The priority order to find the Image location is:
 
 1. Bundle Registry URL + Location specified in the ImagesLocation configuration
-1. `registry` field from `ImagesLocation` + Location specified in the `ImagesLocation` configuration
 1. Bundle Registry URL + Bundle Location + @sha256:{Image SHA}
    **Note:** We need to keep this possible location for retro compatibility.
 1. Location present in ImagesLock file
+
+Assumptions:
+
+- Bundle being pulled or copied is in the following location `registry.io/some/place/bundle`
+- ImagesLock file contains 1 Image that point to `other.registry.io/img1@sha256:aaaaaaa`
+- ImagesLocation looks like the following
+
+```
+registry: private.registry.io
+images:
+- image: other.registry.io/img1@sha256:aaaaaaa
+   repository: some/other/place/img1
+```
+
+`imgpkg` would search the following places for the OCI Image in the order
+
+1. registry.io/some/other/place/img1@sha256:aaaaaaa
+1. registry.io/some/place/bundle@sha256:aaaaaaa
+1. other.registry.io/img1@sha256:aaaaaaa
 
 **Note:** `copy` and `pull` will have to be able to implement the above search
 
