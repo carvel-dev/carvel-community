@@ -66,8 +66,9 @@ Maintenance Flow:
 1. **Development** — as new features are developed, the corresponding documentation goes in the
   `develop` directory.
 2. **Release** — when a new version of the tool is released:
-   1. the `latest` version is renamed with its version number and frozen
-   2. the `develop` version is copied, becoming the `latest`
+   1. the `develop` version is renamed with the new version number (e.g. `v0.32.0`)
+   2. this version of the docs are configured as the "latest" version
+   3. this version is copied to a new `develop`.
     
 #### Freezing a Documentation Set
 
@@ -97,17 +98,13 @@ To indicate that a feature is marked for removal,
 On occasion — and so far, rare at that — a bugfix results in a patch release.
 (e.g. ytt v0.27.x).
 
-In these cases, instead of cutting a whole new version of documentation, simple version caveats are employed to note the fix.
-
-When a subsequent version of docs are cut, those version caveats can be scrubbed.
+In these cases as well, we'll cut a new version of the docs. Doing so keeps the overall process of maintaining documentation straightforward: there are no special cases.
 
 
 #### Use Case: User Navigates into Documentation (current version)
 
-- by default the doc site displays `latest`
-- the doc site's search engine indexes _only_ the current version of the docs.
-  - otherwise, search results could direct users to previous versions of docs.
-
+- by default the doc site displays the latest version (e.g. if `v0.32.0` is configured as "latest", that version is the default)
+- the doc site's search engine indexes _only_ the latest version of the docs.
 
 #### Use Case: User Follows a Deep Link into Documentation (previous version)
 
@@ -115,7 +112,7 @@ It is often a great experience to offer a user a deep link into documentation: i
 
 However, if a deep link is baked to a specific version, it will inevitably will become out-of-date. As a result, a user may find themselves looking at stale information or now, wrong advice.
 
-To mitigate this outcome, document sets other than `latest` should get full-page styling that signals its aged state (e.g. a very light red background to the whole page; or the version warning is implemented such that it never scrolls out of view)
+To mitigate this outcome, document sets other than the latest should get full-page styling that signals its aged state (e.g. a very light red background to the whole page; or the version warning is implemented such that it never scrolls out of view)
 
 
 #### Use Case: User Searches within Documentation
