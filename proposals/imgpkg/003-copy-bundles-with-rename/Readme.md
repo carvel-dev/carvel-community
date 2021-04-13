@@ -171,7 +171,11 @@ overrides:
     destinationRepo: myname/exact-app
 ```
 
-The above configuration will ensure that the OCI Image `public-reg.io/exact-app@sha256:aaaaaaa` will be copied
+Given we provide the above configuration to the following command
+
+`imgpkg copy -b public-reg.io/bundle@bbbbbb --to-repository my.private-registry.io/myname/bundle --config single-repo.yaml`
+
+Given that the Bundle points to the OCI Image `public-reg.io/exact-app@sha256:aaaaaaa`, the above command will copy it
 to `my.private-registry.io/myname/exact-app@sha256:aaaaaaa`. For other options of matching check
 the [Overrides section](#overrides)
 
@@ -188,8 +192,11 @@ kind: CopyConfig
 strategy: MaintainOriginRepository
 ```
 
-When copying a Bundle to `destination.io/bundle` all OCI Images will be copied
-to `destination.io/{Original Repository Name}`
+Given we provide the above configuration to the following command
+
+`imgpkg copy -b public-reg.io/bundle@bbbbbb --to-repository my.private-registry.io/myname/bundle --config maintain-origin-repo.yaml`
+
+All OCI Images will be copied to `my.private-registry.io/{Original Repository Name}`
 
 **Example:**
 
@@ -255,11 +262,13 @@ This field can be used in 2 different ways:
    When this is the case `destinationRepo: /here` the OCI Image will be copied to `registry.io/here`. `imgpkg` assumes
    that the OCI Image should be copied to the root of the Registry
 
-1. the value does not start with `\`
+1. the value does not start with `/`
 
    When the Bundle is being copied to `registry.io/place/bundle` then the OCI Image will be copied
    to `registry.io/place/img`. `imgpkg` assumes that the OCI Image will be copied to the same Registry and Namespace as
    the Bundle.
+
+**Note:** In our documentation we should highlight this feature, since it might be a cause for problems
 
 ##### Exact match
 
@@ -280,6 +289,26 @@ image: public-reg.io/exact-app@sha256:aaaaaaa
 destinationRepo: myname/exact-app
 ```
 
+
+###### Exact Matching with Tag
+
+When the user provides a Tag instead of the SHA for a particular OCI Image, `imgpkg` will do the following:
+1. Try to match all OCI Images with the Registry+Repository
+1. Look in ImagesLock file for the annotation `imgpkg.carvel.dev/image-tags`
+1. Check if the Matched OCI Image in point 1 contains the Tag specified
+
+Example
+```yaml
+kind: ImagesLock
+images:
+  - image: public-reg.io/exact-app@sha256:aaaaaa
+    annotations:
+      - imgpkg.carvel.dev/image-tags: ["will-not-match"]
+  - image: public-reg.io/exact-app@sha256:bbbbb
+    annotations:
+      - imgpkg.carvel.dev/image-tags: ["some-tag"]
+```
+
 Example of override using a Tag
 
 ```yaml
@@ -287,8 +316,7 @@ image: public-reg.io/exact-app:some-tag
 destinationRepo: myname/exact-app
 ```
 
-In the case of exact matching with tag `imgpkg` will have to do the matching using both the Registry+Repository and the
-annotation `imgpkg.carvel.dev/image-tags` to determine if a particular OCI Image match.
+In the above example the OCI Images that will be matched is `public-reg.io/exact-app@sha256:bbbbb`
 
 ##### Match by Registry and Repository
 
