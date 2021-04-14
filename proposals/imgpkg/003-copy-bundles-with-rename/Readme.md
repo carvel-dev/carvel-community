@@ -164,7 +164,7 @@ Fields:
 
 #### Copy Strategies
 
-In this proposal, only 2 strategies will be defined, but in the future, more strategies can be made available. These
+In this proposal, only 4 strategies will be defined, but in the future, more strategies can be made available. These
 Strategies and Overrides will apply to all OCI Images that are contained in the Bundle that is being copied, this
 includes all OCI Images from the current Bundle and Nested Bundles.
 
@@ -227,18 +227,61 @@ All OCI Images will be copied to `my.private-registry.io/{Original Repository}`
 - OCI Image from `origin.io/some/path/my-image@sha256:aaaa` will be copied
   to `destination.io/some/path/my-image@sha256:aaaa`
 
-This strategy also allows overrides
+This strategy also allows overrides, for other options of matching check the [Overrides section](#overrides)
+
+##### Copy all OCI Images to the new Registry and all paths are relative to Bundle Namespace and keeps Image Namespace
+
+This strategy will copy each OCI Image to the target Registry and will store each OCI Image under the same Namespace of
+the Bundle, maintaining the Original Namespace of each Image.
+
+The base configuration to enable this strategy is
 
 ```yaml
 apiVersion: imgpkg.carvel.dev/v1alpha1
 kind: CopyConfig
-strategy: RelativeToRegistryKeepNamespace
-overrides:
-  - image: public-reg.io/exact-app@sha256:aaaaaaa
-    destinationRepo: myname/exact-app
+strategy: RelativeToBundleKeepNamespace
 ```
 
-For other options of matching check the [Overrides section](#overrides)
+Given we provide the above configuration to the following command
+
+`imgpkg copy -b public-reg.io/bundle@bbbbbb --to-repository my.private-registry.io/myname/bundle --config maintain-origin-repo.yaml`
+
+All OCI Images will be copied to `my.private-registry.io/{Destination Bundle Namespace}/{Original Repository}`
+
+**Example using the above `imgpkg` command:**
+
+- OCI Image from `origin.io/my-image@sha256:aaaa` will be copied to `my.private-registry.io/myname/my-image@sha256:aaaa`
+- OCI Image from `origin.io/some/path/my-image@sha256:aaaa` will be copied
+  to `my.private-registry.io/myname/some/path/my-image@sha256:aaaa`
+
+This strategy also allows overrides, for other options of matching check the [Overrides section](#overrides)
+
+##### Copy all OCI Images to the new Registry and all paths are relative to Bundle Namespace
+
+This strategy will copy each OCI Image to the target Registry and will store each OCI Image under the same Namespace of
+the Bundle.
+
+The base configuration to enable this strategy is
+
+```yaml
+apiVersion: imgpkg.carvel.dev/v1alpha1
+kind: CopyConfig
+strategy: RelativeToBundleNoNamespace
+```
+
+Given we provide the above configuration to the following command
+
+`imgpkg copy -b public-reg.io/bundle@bbbbbb --to-repository my.private-registry.io/myname/bundle --config maintain-origin-repo.yaml`
+
+All OCI Images will be copied to `my.private-registry.io/{Destination Bundle Namespace}/{Image Name}`
+
+**Example using the above `imgpkg` command:**
+
+- OCI Image from `origin.io/my-image@sha256:aaaa` will be copied to `my.private-registry.io/myname/my-image@sha256:aaaa`
+- OCI Image from `origin.io/some/path/my-image@sha256:aaaa` will be copied
+  to `my.private-registry.io/myname/my-image@sha256:aaaa`
+
+This strategy also allows overrides, for other options of matching check the [Overrides section](#overrides)
 
 #### Overrides
 
@@ -325,13 +368,14 @@ In the above example the OCI Images that will be matched is `public-reg.io/exact
 This Matcher is more flexible than the [Exact Match](#exact-match) where the only mandatory part provided is the
 Repository. The Registry, Tag and Digest are optional.
 
-This Matcher will match the Repository provided in the field `imageRepo` against all the OCI Images that are
-present in the ImagesLock files for the Bundle and Nested Bundles. In order to match the Repository have to be equal, no
-wildcards allowed.
+This Matcher will match the Repository provided in the field `imageRepo` against all the OCI Images that are present in
+the ImagesLock files for the Bundle and Nested Bundles. In order to match the Repository have to be equal, no wildcards
+allowed.
 
 Schema fields:
 
-- `imageRepo` (required; string) matches values that follow image reference format ([registry]repository[:tag]\[@sha256:...])
+- `imageRepo` (required; string) matches values that follow image reference format ([registry]repository[:tag]\[@sha256:
+  ...])
   and expects Repository portion to match (e.g. project/app).
 - `destinationRepo` (required; string) Repository to where the OCI Image will be copied to. This field can only contain
   Namespace+Repository, where the Namespace is optional (not all registries support multiple Namespace nesting it)
@@ -847,19 +891,33 @@ API Implementation:
 At this point in time the user can select a Copy Strategy that will apply to all OCI Images in the Bundle. To create
 Overrides for the selected strategy the user will have to choose between Overrides or a Mapping function.
 
+#### Phase 4 - Add Extra Strategies (Optional)
+
+This phase can be done in parallel with Phase 3, and is Optional(not required to declare this track of work completed).
+
+After this phase is complete the users would be able to:
+
+1. `imgpkg` will tag OCI Images when copying a Bundle
+1. `kbld` fill the new annotation with the tag values
+1. Copy OCI Images between registries choosing the strategy that best suites their needs.
+1. When user is copying Bundles and do not select a strategy, copy will use `SingleRepository` as the default strategy.
+1. Pull a Bundle to disk and see the correct locations for all OCI Images in the Images Lock files.
+1. Create Overrides for the selected strategy
+1. Create a mapping function using `ytt` starlark
+1. Copy Images using 2 new strategies `RelativeToBundleNoNamespace` and `RelativeToBundleKeepNamespace`
+
+API Implementation:
+At this point in time the user can select a Copy Strategy and Overrides that will apply to all OCI Images in the Bundle
+
 ```yaml
 apiVersion: imgpkg.carvel.dev/v1alpha1
 kind: CopyConfig
-strategy: (SingleRepository|RelativeToRegistryKeepNamespace)
-mappingFunctionYttStar: |
-  def process(image):
-    if regexMatch(image, '.*image1.*')
-      return 'myname/exact-app'
-    elif imageName(image) == 'other-image'
-      return 'some-other-repo'
-    end
-    return imageName(image)
-  end
+strategy: (SingleRepository|RelativeToBundleNoNamespace|RelativeToBundleKeepNamespace|RelativeToRegistryKeepNamespace)
+overrides:
+  - imageRepo: public-reg.io/simple-app
+    destinationRepo: myname/simple-app
+  - image: public-reg.io/exact-app@sha256:aaaaaaa
+    destinationRepo: myname/exact-app
 ```
 
 ### Other Approaches Considered
