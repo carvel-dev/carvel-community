@@ -19,7 +19,7 @@ Revng is a small company with expertise in compilers, emulation and binary analy
 
 **[VMware](https://www.vmware.com)**
 
-VMware uses Carvel as their package management tooling for [their Kubernetes offerings](https://tanzu.vmware.com/products), such as [Tanzu Mission Control](https://tanzu.vmware.com/mission-control)(TMC) and [Tanzu Kubernetes Grid](https://tanzu.vmware.com/kubernetes-grid)(TKG). 
+VMware uses Carvel as their package management tooling for [their Kubernetes offerings](https://tanzu.vmware.com/products), such as [Tanzu Mission Control](https://tanzu.vmware.com/mission-control) (TMC) and [Tanzu Kubernetes Grid](https://tanzu.vmware.com/kubernetes-grid) (TKG). 
 
 ## Adding your organization to the list of adopters
 
