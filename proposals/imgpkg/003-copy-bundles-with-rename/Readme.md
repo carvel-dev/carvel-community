@@ -1025,3 +1025,11 @@ overrides:
   Image from `registry.io`
 
   **Answer:** No, unless the OCI Image original location (ImagesLock) is in `registry.io`
+
+- What should `imgpkg` do if the User tries to use a strategy that doesn't work on a particular Registry. The most
+  common example would be that the Registry does not support Namespaces and the User is asking `imgpkg` to add them.
+
+  **Answer:** `imgpkg` should error out and tell the user that the Strategy chosen does not work in the destination
+  Registry. Instead of trying to do the best effort, in this case, the User is asking `imgpkg` to do an operation that is
+  not supported by the destination Registry. We assume that if this is considered an error for the Registry it should also
+  be an error for `imgpkg` 
