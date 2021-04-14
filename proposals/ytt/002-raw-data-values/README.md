@@ -1,285 +1,179 @@
 ---
-title: Accept Unannotated YAML as Data Values
-authors: 
+title: Data Values as Plain YAML
+authors:
 - John Ryan <ryanjo@vmware.com>
 - Steven Locke <slocke@vmware.com>
-status: in-review
-approvers: 
+  status: draft
+  approvers:
 - Dmitriy Kalinin <dkalinin@vmware.com>
 - Eli Wrenn <ewrenn@vmware.com>
 ---
 
-# Accept Unannotated YAML as Data Values
+# Data Values as Plain YAML
 
 ## Problem Statement
 
-Today, Configuration Consumers providing configuration data to a `ytt` invocation is required to do so by capturing those as a YAML document and annotating it _as_ a Data Values document. Further -- given that all Data Values documents are overlays, they must resolve any merge ambiguities by annotating the document with `@overlay/...`.
+Today, users primarily supply Data Values using Data Values Overlays.
 
-These requirements make integrating `ytt` into automation tooling less than desirable: the `ytt` concepts of "data values" and "overlays" are foisted on the happless end user of that automation tooling when all they wanted to do was customize their use of some higher-level feature (e.g. the `values` portion of an `InstalledPackage`).
+Configuration Consumers providing configuration data to a `ytt` invocation is required to do so by capturing those as a YAML document and annotating it _as_ a Data Values Overlay (i.e. `@data/values`). Further, they must resolve any merge ambiguities by annotating the document with `@overlay/...`.
 
-Likewise, some Configuration Consumers (i.e. direct users of `ytt`) may be supplying Data Values via upstream tooling. These users shoulder the glue work required to integrate `ytt` into their toolchain.
-
-**What's needed is a mode of accepting Data Values into a `ytt` invocation stripped of any requirements to understand `ytt` concepts or syntax.**
-
-That said, doing so must not dimish the reliability and safety that `ytt` aims to bring.  Specifically, `ytt` provides Configuration Consumers with fast feedback on likely errors in specifying Data Values.
-
-There are two (2) broad scenarios considered:
-- [Scenario: Consumer Configuration is Additive](#scenario-consumer-configuration-is-additive)
-- [Scenario: Consumer Configuration (of arrays) To Overwrite Defaults](#scenario-consumer-configuration-of-arrays-to-overwrite-defaults)
-
-**See Also:**
-
-- https://carvel.dev/kapp-controller/docs/latest/package-consumption/#installing-a-package
+Examples:
 - https://github.com/vmware-tanzu/carvel-ytt/issues/81
 - https://github.com/vmware-tanzu/carvel-ytt/issues/51
 
-### Scenario: Consumer Configuration is Additive
+These requirements also make integrating `ytt` into automation tooling less than desirable: the `ytt` concepts of "data values" and "overlays" are foisted on the hapless end user of that automation tooling when all they wanted to do was customize their use of some higher-level feature.
 
-Configuration Consumer finds the library's defaults an acceptable basis on which they can meet their needs by merging in their own values.
+Example:
+- the `values` section of an `InstalledPackage` custom resource: https://carvel.dev/kapp-controller/docs/latest/package-consumption/#installing-a-package
 
-In this case:
-- schema defines the full set of Data Values with reasonable defaults.
-- Configuration Consumer: overrides specific scalars and _merge_ values for arrays
+Likewise, some Configuration Consumers (i.e. direct users of `ytt`) may be supplying Data Values via upstream tooling. These users shoulder the glue work required to integrate `ytt` into their toolchain.
 
-**Author Inputs:**
+**What's needed is a mode of accepting Data Values into a `ytt` invocation stripped of any requirements to understand overlay concepts or syntax.**
 
-```yaml
-#! schema.yml
-#@schema/definition data_values=True
----
-foo: ""
-bars:
-- ""
-rees: 1
-```
+## Terminology / Concepts
 
-```yaml
-#! default-values.yml
-#@data/values
----
-bars:
-- barA
-- barB
-- barC
-```
-
-```yaml
-#! template.yml
-#@ load("@ytt:data", "data")
----
-values: #@ data.values
-```
-
-**Consumer Input:**
-
-`values.yml`
-```yaml
-foo: fooy
-bars:
-- bar1
-- bar2
-```
-
-**Desired Output:**
-
-```yaml
-values:
-  foo: fooy
-  bars:
-  - barA
-  - barB
-  - barC
-  - bar1
-  - bar2
-  rees: 1
-```
-
-### Scenario: Consumer Configuration (of arrays) To Overwrite Defaults
-
-The Configuration Author intends to provide a simple Out of The Box experience by providing defaults, even for configuration that are arrays.
-The Configuration Consumer needs to _overwrite_ any existing config, rather than merge.
-
-In this case:
-- schema defines the full set of Data Values with reasonable defaults;
-- one or more arrays in the schema are non-empty;
-- Consumer-supplied Data values include one or more non-empty arrays.
-
-**Authored Inputs:**
-
-```yaml
-#! schema.yml
-#@schema/definition data_values=True
----
-foo: ""
-bars:
-- ""
-rees: 1
-```
-
-```yaml
-#! default-values.yml
-#@data/values
----
-bars:
-- barA
-- barB
-- barC
-```
-
-```yaml
-#! template.yml
-#@ load("@ytt:data", "data")
----
-values: #@ data.values
-```
-
-**Consumer Input:**
-
-`values.yml`
-```yaml
-foo: fooy
-bars:
-- bar1
-- bar2
-```
-
-**Desired Output:**
-
-```yaml
-values:
-  foo: fooy
-  bars:
-  - bar1
-  - bar2
-  rees: 1
-```
-
+- **`data` module** : the `ytt` module that supplies Data Values to templates (typically via `load("@ytt:data", "data")`).
+- **Data Value** : an input into `ytt` (typically a key/value pair in a YAML document) that ultimately is presented to templates via the `data` module.
+- **Data Values** : a colloquial phrase referring to the full set of Data Values.
+- **Data Values Overlay** : a YAML document annotated with `@data/values`. It optionally contains `@overlay` annotations to resolve matching ambiguities and indicate the action/edit desired. These overlays are plucked from the set of files provided in an `ytt` invocation and processed first, before any templates are evaluated.
+- "**plain YAML file**" : short-hand for a file whose contents are in YAML format and contain no `ytt` annotations.
+- **private library** : a `ytt` library acting as a dependency on the primary (aka "Root") library. (see also [`ytt` docs > Library Module](https://carvel.dev/ytt/docs/latest/lang-ref-ytt-library/#library-module))
 
 ## Proposal
 
-### Goals and Non-goals
+In short:
+- introduce a new flag: `--data-values-file`;
+- accept only plain YAML;
+- behaves like a set of `--data-value-yaml` parameters;
+- continue to support Data Values Overlays, but background them as an "advanced feature."
 
-**Goals**
-- Make it possible for user-supplied configuration devoid of any `ytt`-specific syntax to flow to `ytt` (typically _through_ other tooling) and affect data values without any special handling for the majority of use cases.
-- Avoid introducing situation-specific mechanisms.
+### Goals
 
-**Non-Goals**
-- Provide a way to edit data values from the command-line that is feature-parity with overlay annotations.
+- describe a mechanism by which plain YAML can be supplied as Data Values.
+- preserve the full functionality provided by (now known as) Data Values Overlays.
 
+### Non-Goals
+
+- achieve feature parity with Data Values Overlays.
 
 ### Specification
 
-#### Part One: yaml-data-values File Type
+`ytt` has a family of flags that provide an interface by which Data Values can be supplied.
 
-`ytt` has an existing mechanism for indicating what type of file a given input is: [file marks](https://carvel.dev/ytt/docs/latest/file-marks/).
+Today, Data Values...
+- can be plucked from OS environment variables (`--data-values-env[-yaml]`) or provided explicitly on the command-line (`--data-value[-yaml]`).
+- can be accepted as strings `--data-values{-env,}` or parsed as YAML expressions `--data-values{-env,}-yaml`
 
-Meet the specified needs by introducing another file type: `yaml-data-values`.
+Extend this family of flags to be _the_ first-class means of supplying Data Values, including a full set of values via a plain YAML file. This will be done via a new flag: `--data-values-file`
 
-This type extends the "family" of file types: `yaml-plain` and `yaml-template` which also provide the Consumer with the ability to override `ytt`'s inferred typing.
 
-Marking a file as `type:yaml-data-values` is equivalent to annotating it:
+##### Syntax
 
+```console
+ytt ... --data-values-file [<libref>]<filepath>
+```
+where:
+- `filepath` refers to a file that contains plain YAML. Data Values will be extracted and set from its contents.
+  - there are no restrictions on the name of the file, but the `.yaml` or `.yml` extension is recommended.
+- `libref` directs the values to the specified private library
+  - format: `@(<library-name> | ~<alias>):` (i.e. identical to the syntax for other `--data-value...` flags)
+
+**Example:**
+
+Given a file:
+
+`values.yml`
 ```yaml
-#@data/values
-#@overlay/match-child-defaults missing_ok=True
+---
+foo:
+  bar: 42
+ree:
+- 1
+- 2
+- 3
 ```
-
-From the CLI:
-```console
-$ ytt -f . --file-mark='values.yml:type=yaml-data-values'
-```
-
-Within a Starlark program: _(this already exists, today)_
-```starlark
-library.with_data_values(...)
-```
-
-In the case where the YAML documents in the supplied file are _already_ annotated as `@data/values`, including this file mark is no-op.
-
-
-##### Consideration: Imposed Restrictions on Marked Files
-
-`@data/values` _technically_ is a YAML Document-level annotation. Marking an entire file as "data values" means that _all_ YAML documents within it would be considered as such.  Notably, doing so conflicts with any future feature that aims to support Data Values co-existing with the templates that use them.
-
-- currently, `ytt` disallows any other kind of document in a given file. So, this restriction is -- in practice -- not new.
-- this "constraint" would be scoped to _only_ files explicitly file-marked as described
-
-
-##### Consideration: Array Items Requiring an @overlay/match
-
-Array items have traditionally required _some_ kind of matching as there was no default operation defined for them. This meant that overlays on documents that contained arrays could not be written without including such annotations.
-
-At the time of writing, a feature that extends the default merge operation to array items has _just_ been merged into `develop`. Therefore, for the base use-case, there are no annotations required.
-
-
-##### Consideration: Does not Support Replace Use-Case
-
-This option does not answer directly for other kinds of overlay operations besides merge. Of most notable concern is [Use Case: Array Replace](#use-case-array-replace): replacing the contents of an array that had a non-empty default value.
-
-Given:
-- in practice, few Configuration Authors provide default values for arrays. Typically, such values source from the Consumer's context rather than the authors.
-- in the rare case where a Configuration Consumer _does_ wish to customize the processing of their data values, they have the full power of `ytt`'s Overlay features available to them.
-- in the specific case of replacing the contents of an array, this amounts to understanding one (1) annotation: `@overlay/replace`.
-
-Given these factors, we believe there is no need, at this time, to provide a convenience mechanism to affect any other than the default overlay operations on data values.
-
-
-##### Consideration: File Marks can be Ambiguous
-
-[@cppforlife](https://github.com/cppforlife) [noted](https://github.com/vmware-tanzu/carvel-community/pull/21#discussion_r591942769), that
-
-> file marks ... operate on relative path names
-
-This means that it is technically possible to unintentionally mark a file as `yaml-data-values`.
-
-This "feature" is a behavior scoped to the File Mark mechanism, itself -- orthogonal to the behavior of this specific File Type.  Whatever is done to "fix" resolving those file references would address this concern.
-
-Therefore, we'll address this concern in [a separate proposal](https://github.com/vmware-tanzu/carvel-ytt/discussions/326).
-
-
-#### Part Two: --data-values-file flag
-
-`ytt` also includes the `--data-value...` family of command-line flags.
-
-We could extend that group of flags with `--data-values-file`.
-
-For example:
-```console
-$ ytt -f config/ --data-values-file ../special-env/my-values.yml
-```
-
-This would:
-- include `../special-env/my-values.yml` as a file in the relative root (i.e. in the root library), and
-- mark that file as type `yaml-data-values`.
-
-It is the equivalent of:
 
 ```console
-$ ytt -f config/ -f ../special-env/my-values.yml --file-mark 'my-values.yml:type=data-values'
+$ ytt -f config/ --data-values-file ../dev/values.yml --data-values-inspect
+foo:
+  bar: 42
+ree:
+- 1
+- 2
+- 3
 ```
 
 
-##### Consideration: Additional Optional Complexity
+##### Multiple Documents
 
-Including this feature would add [optional interface complexity](http://www.catb.org/~esr/writings/taoup/html/ch13s01.html#id2961759):
+`--data-values-file` can be specified multiple times. The file supplied in as a parameter can contain zero or more documents.
 
-- there would be two ways to indicate a plain YAML file containing Data Values documents:
-  1. via the `type=yaml-data-values` file mark
-  2. via this flag
-- there would be two ways to include files for processing from two different groups of flags:
-  1. via the `--file` flag
-  2. via this special case of the `--data-value...` family of flag.
-- there's another flag with the same words in a different order: `--file-data-values`, for the user with less than complete familiarity with the tool, it can be easy to get these two flags mixed up (noted [in this review](https://github.com/vmware-tanzu/carvel-community/pull/21#discussion_r589724130)).
+Regardless the means, each instance of a Data Value overwrites the previous value, as if it were specified via the `--data-value-yaml` flag.
 
-On the other hand, this flag would be particularly convenient. It is more succinct and conceptually lighter than the file mark approach. It would make the (very common?) use-case of naming _the_ customizing input more accessible to a wide group of users.
+Given the following files:
+
+`alpha.yaml`
+```yaml
+foo:
+  bar: 13
+```
+
+`beta.yaml`
+```yaml
+foo:
+  bar: 42
+```
+
+`omega.yaml`
+```yaml
+---
+foo:
+  bar: 13
+---
+foo:
+  bar: 42
+```
+
+All of the following are equivalent:
+
+```console
+$ ytt ... --data-values-file alpha.yaml --data-values-file beta.yaml
+$ ytt ... --data-values-file omega.yaml
+$ ytt ... -v foo.bar=13 -v foo.bar=42
+```
 
 
-## Open Questions
+##### Interaction with Schema
 
-**Q1:** Does the convenience of `--data-values-file` outweigh the optional complexity it brings?
+There are no new interactions between Data Values supplied with this new flag and schema. Data Values supplied with this new flag are checked and validated against schema in exactly the same way.
 
 
-## Answered Questions
+##### Interactions with Data Values Overlays
 
-**Q2:** Does the success of this feature depend on resolving the ambiguity deficiency in File Marks?
-**A2:** Yes. Not doing so will be particularly surprising, rather hard to detect the source, and produces incorrect results.
+There are no new interactions between Data Values supplied with this new flag and Data Values Overlays:
+
+- just as values supplied via other `--data-value...` flags have higher precedence over any Data Values Overlays, so too with the values specified by this new flag.
+- users will not be _required_ to supply data values via the `--data-values-file` flag; users are free to continue specifying these values via Data Values Overlays.
+
+
+##### Interactions with Private Libraries
+
+As noted above in [Syntax](#syntax), above, a user may optionally specify the exact library that should receive the Data Values.
+
+
+##### Miscellaneous
+
+- YAML comments (i.e. strings prefixed with `#`) are permitted in Data Values files given they are treated as plain YAML and not a `ytt` template.
+
+
+##### Consideration: Confusingly similar to `--data-value-file`
+
+_(the inputs to these two flags are in a different format: it will be relatively easy to detect, and redirect the user, when one flag is used when the other was intended.)_
+
+It will likely be crucial for a possible user experience that the messaging around these two flags takes into account this possible confusion or simple mistype.
+
+
+##### Consideration: Does not support merging arrays
+
+_(Yup. Our experience shows that typically more advanced users have this need. It's still available via Data Values Overlays.)_
+
