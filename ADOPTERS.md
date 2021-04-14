@@ -17,6 +17,10 @@ Below is a list of solutions where Carvel is being used as a component.
 
 Revng is a small company with expertise in compilers, emulation and binary analysis. Revng uses ytt as a flexible templating tool to generate the configuration for [orchestra](https://github.com/revng/orchestra), their meta build system/package manager.
 
+**[VMware](https://www.vmware.com)**
+
+VMware uses Carvel as their package management tooling for [their Kubernetes offerings](https://tanzu.vmware.com/products), such as [Tanzu Mission Control](https://tanzu.vmware.com/mission-control)(TMC) and [Tanzu Kubernetes Grid](https://tanzu.vmware.com/kubernetes-grid)(TKG). 
+
 ## Adding your organization to the list of adopters
 
 If you are using Carvel and would like to be included in the list of Carvel Adopters, add an SVG version of your logo to
