@@ -1,12 +1,12 @@
 ---
 title: Data Values as Plain YAML
 authors:
-- John Ryan <ryanjo@vmware.com>
-- Steven Locke <slocke@vmware.com>
-  status: draft
-  approvers:
-- Dmitriy Kalinin <dkalinin@vmware.com>
-- Eli Wrenn <ewrenn@vmware.com>
+  - John Ryan <ryanjo@vmware.com>
+  - Steven Locke <slocke@vmware.com>
+status: draft
+approvers:
+  - Dmitriy Kalinin <dkalinin@vmware.com>
+  - Eli Wrenn <ewrenn@vmware.com>
 ---
 
 # Data Values as Plain YAML
@@ -66,17 +66,233 @@ Today, Data Values...
 
 Extend this family of flags to be _the_ first-class means of supplying Data Values, including a full set of values via a plain YAML file. This will be done via a new flag: `--data-values-file`
 
-
-##### Syntax
+Syntax:
 
 ```console
-ytt ... --data-values-file [<libref>]<filepath>
+ytt ... --data-values-file [<libref>][+:]<filepath>
 ```
 where:
-- `filepath` refers to a file that contains plain YAML. Data Values will be extracted and set from its contents.
-  - there are no restrictions on the name of the file, but the `.yaml` or `.yml` extension is recommended.
 - `libref` directs the values to the specified private library
   - format: `@(<library-name> | ~<alias>):` (i.e. identical to the syntax for other `--data-value...` flags)
+- `+:` if present indicates that the Data Values in the document(s) should be set whether or not they have been previously declared.
+- `filepath` refers to a file that contains plain YAML. Data Values will be extracted and set from its contents.
+  - there are no restrictions on the name of the file, but the `.yaml` or `.yml` extension is recommended.
+
+Given how common this flag will be used, it also has a shorthand form:
+
+```console
+ytt ... -d [<libref>][+:]<filepath>
+```
+
+
+#### Multiple Documents
+
+`--data-values-file` can be specified multiple times. The file supplied in as a parameter can contain zero or more documents.
+
+Regardless the means, each instance of a Data Value overwrites the previous value, as if it were specified via the `--data-value-yaml` flag.
+
+
+#### Interaction with Schema
+
+There are no new interactions between Data Values supplied with this new flag and schema. 
+- Data Values supplied with this new flag are typed, checked, and validated against schema in exactly the same way as Data Values specified via the other `--data-value` flags.
+
+
+#### Interactions with Data Values Overlays
+
+There are no new interactions between Data Values supplied with this new flag and Data Values Overlays:
+
+- just as values supplied via other `--data-value...` flags have higher precedence over any Data Values Overlays, so too with the values specified by this new flag.
+- users will not be _required_ to supply data values via the `--data-values-file` flag; users are free to continue specifying these values via Data Values Overlays.
+- documentation and examples need adjusting to clearly message that _this_ mechanism is preferred for most use-cases
+
+
+#### Interactions with Private Libraries
+
+A user may optionally indicate the exact library that should receive the Data Values. This is done using the `libref` notation described at the start of [Specification](#specification).
+
+
+#### Miscellaneous
+
+- YAML comments (i.e. strings prefixed with `#`) are permitted in Data Values files given they are treated as plain YAML and not a `ytt` template.
+
+
+#### Consideration: Confusingly similar to `--data-value-file`
+
+One observation is that `--data-values-file` is easily confused or even mistyped to `--data-value-file`.
+
+We believe this similarity is acceptable because:
+1. it is relatively easy to detect when the argument given was intended for the other flag; and
+2. the actual difference (i.e. the former is the plural of "data value") can help in remembering which flag is applicable when.
+
+Examining the "signature" of each flag:
+- `--data-values-file` — has an argument in the format: `<filepath>` (e.g. `../dev/values.yml`)
+- `--data-value-file` — has an argument in the format: `<keypath>=<filepath>` (e.g. `server.certificate=../server.cert`)
+
+We note that `--data-value-file` _requires_ the equal sign in the parameter — a character that is highly unlikely to appear in a `filepath`. We expect it trivial to detect when one flag was used with the parameter intended for the other and can provide the needed hint to get the user back on track.
+
+Further, that the newly proposed flag refers to `data-values` (i.e. the plural), it's a mnemonic that the flag is specifying _multiple_ values. In contrast, the existing flag refers to `data-value` (i.e. the singular), a reminder that the value specified is headed for the data value at `keypath`.
+
+
+#### Consideration: Does not support merging arrays
+
+The careful reader will note that values specified through the `--data-values-file` flag _replaces_ any previously set value. This is most noticeable for values that are arrays.
+
+
+
+
+### Examples 
+
+#### Example: Single document
+
+_Absent schema, the first file declares the set of Data Values._
+
+`values.yml`
+```yaml
+foo: 13
+bar:
+- name: alpha
+- name: beta
+```
+
+```console
+$ ytt --data-values-file values.yml --data-values-inspect
+foo: 13
+bar:
+- name: alpha
+- name: beta
+```
+
+#### Example: Multiple instances of `--data-values-file`
+
+_Each file overwrites previously specified values._
+
+`values.yml`
+```yaml
+foo: 13
+bar:
+- alpha
+- beta
+```
+
+`values2.yml`
+```yaml
+bar:
+- first
+- second
+```
+
+```console
+$ ytt --data-values-file values.yml --data-values-file values2.yml --data-values-inspect
+foo: 13
+bar:
+- first
+- second
+```
+
+#### Example: Multiple documents in a file
+
+_Each document overwrites previously specified values._
+
+`values.yml`
+```yaml
+foo: 13
+bar:
+- alpha
+- beta
+---
+bar:
+- first
+- second
+```
+
+```console
+$ ytt --data-values-file values.yml --data-values-file values2.yml --data-values-inspect
+foo: 13
+bar:
+- first
+- second
+```
+
+#### Example: Empty file has no effect
+
+_Empty files are accepted but are, in effect, a no-op._
+
+`values.yml`
+```yaml
+foo: 13
+bar:
+- alpha
+- beta
+```
+
+`values2.yml`
+```yaml
+```
+
+```console
+$ ytt --data-values-file values.yml --data-values-file values2.yml --data-values-inspect
+foo: 13
+bar:
+- alpha
+- beta
+```
+
+#### Example: Declaring additional data values
+
+_Absent schema, additional data values can be declared._
+
+`values.yml`
+```yaml
+foo: 13
+bar:
+- alpha
+- beta
+```
+
+`values2.yml`
+```yaml
+bar:
+- first
+- second
+ree: true
+```
+
+```console
+$ ytt --data-values-file values.yml --data-values-file +values2.yml --data-values-inspect
+foo: 13
+bar:
+- first
+- second
+ree: true
+```
+
+#### Example: Process substitution
+#### Example: Target a library
+#### Example: Target a library alias
+
+#### Example: Scalar Data Value
+
+_While rare, it is valid to specify a single data value that is a scalar._
+
+`values.yml`
+```yaml
+42
+```
+
+`template.yml`
+```yaml
+#@ load("@ytt:data", "data")
+---
+answer: #@ data.values
+```
+
+```console
+$ ytt -f template --data-values-file values.yml
+answer: 42
+```
+
+#### Example: 
 
 **Example:**
 
@@ -102,14 +318,6 @@ ree:
 - 2
 - 3
 ```
-
-
-##### Multiple Documents
-
-`--data-values-file` can be specified multiple times. The file supplied in as a parameter can contain zero or more documents.
-
-Regardless the means, each instance of a Data Value overwrites the previous value, as if it were specified via the `--data-value-yaml` flag.
-
 Given the following files:
 
 `alpha.yaml`
@@ -141,39 +349,3 @@ $ ytt ... --data-values-file alpha.yaml --data-values-file beta.yaml
 $ ytt ... --data-values-file omega.yaml
 $ ytt ... -v foo.bar=13 -v foo.bar=42
 ```
-
-
-##### Interaction with Schema
-
-There are no new interactions between Data Values supplied with this new flag and schema. Data Values supplied with this new flag are checked and validated against schema in exactly the same way.
-
-
-##### Interactions with Data Values Overlays
-
-There are no new interactions between Data Values supplied with this new flag and Data Values Overlays:
-
-- just as values supplied via other `--data-value...` flags have higher precedence over any Data Values Overlays, so too with the values specified by this new flag.
-- users will not be _required_ to supply data values via the `--data-values-file` flag; users are free to continue specifying these values via Data Values Overlays.
-
-
-##### Interactions with Private Libraries
-
-As noted above in [Syntax](#syntax), above, a user may optionally specify the exact library that should receive the Data Values.
-
-
-##### Miscellaneous
-
-- YAML comments (i.e. strings prefixed with `#`) are permitted in Data Values files given they are treated as plain YAML and not a `ytt` template.
-
-
-##### Consideration: Confusingly similar to `--data-value-file`
-
-_(the inputs to these two flags are in a different format: it will be relatively easy to detect, and redirect the user, when one flag is used when the other was intended.)_
-
-It will likely be crucial for a possible user experience that the messaging around these two flags takes into account this possible confusion or simple mistype.
-
-
-##### Consideration: Does not support merging arrays
-
-_(Yup. Our experience shows that typically more advanced users have this need. It's still available via Data Values Overlays.)_
-
