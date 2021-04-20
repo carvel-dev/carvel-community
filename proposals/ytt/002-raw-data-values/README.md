@@ -3,7 +3,7 @@ title: Data Values as Plain YAML
 authors:
   - John Ryan <ryanjo@vmware.com>
   - Steven Locke <slocke@vmware.com>
-status: draft
+status: 
 approvers:
   - Dmitriy Kalinin <dkalinin@vmware.com>
   - Eli Wrenn <ewrenn@vmware.com>
@@ -120,7 +120,9 @@ It is no uncommon that users will want to supply Data Values in not just one YAM
 This use-case is supported:
 
 - the `--data-values-file` flag can be specified multiple times.
+  - left-most instance applied first.
 - the file given to the flag can contain zero or more documents.
+  - top-most document applied first.
 - each instance of a Data Value _replaces_ the previous value (this is already the behavior of the `--data-value[-yaml]` flag.
 
 See also:
@@ -162,9 +164,16 @@ This includes (but is not limited to):
 - examples use Data Values Files (instead of Data Values Overlays), unless overlay-specific features are being employed
 
 
-#### Miscellaneous
+#### Contents of Data Values Files
 
-- YAML comments (i.e. strings prefixed with `#`) are permitted in Data Values files given they are treated as plain YAML and not a `ytt` template.
+Data Values Files are plain YAML files that happen to contain Data Values.
+
+As such:
+- YAML comments (i.e. strings prefixed with `#`) are permitted (as well as other features enjoyed by plain YAML)
+- `ytt` annotations (i.e. strings prefixed with `#@`) are _not_ permitted
+  - this prevents end-users from including executable bits, making it possible to better secure integration with `ytt`
+    - for example, a `#@ while True:` never returns.
+  - when such features are desired, users can employ / integrators can allow Data Values Overlays
 
 
 #### Consideration: Confusingly similar to `--data-value-file`
