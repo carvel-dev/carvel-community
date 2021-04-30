@@ -146,6 +146,10 @@ spec:
   license: ...
 ```
 
+Because PackageVersions must reference a higher level package definition, if
+that package does not exist, kapp-controller will create an empty Package CR
+with the correct name.
+
 #### InstalledPackage CR
 This CR will remain largely unchanged, except for a slight update to how
 the desired Package is referenced.
@@ -224,6 +228,13 @@ the desired information about their package, and then author new PackageVersions
 any time a new version is ready to be shipped. Authors are also able to iterate
 on the Package CR as they see fit.
 
+In the case an author wants to provide a repo that adds versions, without
+redefining the package, they will be able to create a repository without a
+corresponding Package CR. Once the consumers add this repository, if the package
+is already available on the cluster, the new versions will simply be added, but
+if the Package CR is not present, kapp-controller will automatically create an
+empty Package CR with the correct name.
+
 Note: There are some open questions related to how these CRs will be
 incorporated into a repository, but these problems exist in the current state
 and should not block this proposal.
@@ -238,7 +249,12 @@ PackageMetadata CR, which pacakges then reference.
 
 ## Open Questions
 1. How do we handle the case of two repositories both defining the same Package?
+
+## Answered Questions
+
 1. How do we handle the case of a repository containing PackageVersion CRs, but
    not the required Package CR?
 
-## Answered Questions
+   - The current thinking here is to have kapp-controller automatically add the
+     needed Package CR. The CR will be empty and only created if one does not
+     already exist on the cluster.
