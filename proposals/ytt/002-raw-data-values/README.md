@@ -15,7 +15,9 @@ approvers:
 - [Terminology / Concepts](#terminology--concepts)
 - [Proposal](#proposal)
   - [Specification](#specification)
+  - [Analysis](#analysis)
   - [Examples](#examples)
+- [Open Questions](#open-questions)  
   
 ## Problem Statement
 
@@ -63,6 +65,15 @@ In short:
 - it behaves like a set of `--data-value-yaml` parameters;
 - continue to support Data Values Overlays, but background them as an "advanced feature."
 
+Details:
+
+- [Goals](#goals)
+- [Non-Goals](#non-goals)
+- [Specification](#specification)
+- [Analysis](#analysis)
+- [Examples](#examples)
+
+
 ### Goals
 
 - describe a mechanism by which plain YAML can be supplied as Data Values.
@@ -85,19 +96,18 @@ We propose to extend this family of flags to be _the_ first-class means of suppl
 Syntax:
 
 ```console
-ytt ... --data-values-file [<libref>][+:]<filepath>
+ytt ... --data-values-file [<libref>]<filepath>
 ```
 where:
 - `libref` directs the values to the specified private library
   - format: `@(<library-name> | ~<alias>):` (i.e. identical to the syntax for other `--data-value...` flags)
-- `+:` if present indicates that the Data Values in the document(s) should be set whether or not they have been previously declared. By default, it is an error to set a Data Value that has not been declared (either in a prior Data Value or Schema).
 - `filepath` refers to a file that contains plain YAML. Data Values will be extracted and set from its contents.
   - there are no restrictions on the name of the file, but the `.yaml` or `.yml` extension is recommended.
 
 Given how common this flag will be used, it also has a shorthand form:
 
 ```console
-ytt ... -d [<libref>][+:]<filepath>
+ytt ... -d [<libref>]<filepath>
 ```
 
 (see [Example: Giving a Single YAML Document](#example-giving-a-single-yaml-document) to illustrate the simplest case.)
@@ -110,12 +120,10 @@ We consider a number of factors in turn:
 - [Interactions with Private Libraries](#interactions-with-private-libraries)
 - [Clear Consistent Messaging Around Data Values](#clear-consistent-messaging-around-data-values)
 - [Miscellaneous](#miscellaneous)
-- [Consideration: Confusingly similar to `--data-value-file`](#consideration-confusingly-similar-to---data-value-file)
-- [Consideration: Does not support merging arrays](#consideration-does-not-support-merging-arrays)
 
 #### Multiple Documents
 
-It is no uncommon that users will want to supply Data Values in not just one YAML document, but many.
+It is not uncommon that users will want to supply Data Values in not just one YAML document, but many.
 
 This use-case is supported:
 
@@ -124,6 +132,7 @@ This use-case is supported:
 - the file given to the flag can contain zero or more documents.
   - top-most document applied first.
 - each instance of a Data Value _replaces_ the previous value (this is already the behavior of the `--data-value[-yaml]` flag.
+- if a given Data Value had not been previously named, it is _added_ (the same behavior as if the value was supplied by `--data-value[-yaml] (key)+=(value)`, i.e. with the `+` operator as implemented at [data_values_flags.go](https://github.com/vmware-tanzu/carvel-ytt/blob/906bfe07cf1aded44f21fbdb501c76f911406fc8/pkg/cmd/template/data_values_flags.go#L234))
 
 See also:
 - [Example: Giving Multiple YAML Files](#example-giving-multiple-yaml-files)
@@ -163,6 +172,8 @@ This includes (but is not limited to):
 - when Data Values are mentioned, the "Data Values File" feature is referenced (rather than the "Data Values Overlay" feature)
 - examples use Data Values Files (instead of Data Values Overlays), unless overlay-specific features are being employed
 
+_(see also: [Consideration: Implies a Significant Effort to Implement](#consideration-implies-a-significant-effort-to-implement))_
+
 
 #### Contents of Data Values Files
 
@@ -171,9 +182,16 @@ Data Values Files are plain YAML files that happen to contain Data Values.
 As such:
 - YAML comments (i.e. strings prefixed with `#`) are permitted (as well as other features enjoyed by plain YAML)
 - `ytt` annotations (i.e. strings prefixed with `#@`) are _not_ permitted
-  - this prevents end-users from including executable bits, making it possible to better secure integration with `ytt`
-    - for example, a `#@ while True:` never returns.
-  - when such features are desired, users can employ / integrators can allow Data Values Overlays
+  - this helps catch cases where a user submits a `ytt` template (e.g. a Data Values Overlay, containing at least the `@data/values` document annotation), and it quietly ignores all directives because the file is treated as a plain YAML.
+  - when such features are desired, users can employ / integrators can allow Data Values Overlays and direct those inputs to the `--file` flag.
+
+### Analysis
+
+The following are commentary regarding the above specification:
+
+- [Consideration: Confusingly similar to `--data-value-file`](#consideration-confusingly-similar-to---data-value-file)
+- [Consideration: Does not support merging arrays](#consideration-does-not-support-merging-arrays)
+- [Other Approach Considered: Introduce a new File Mark Type](#other-approach-considered-introduce-a-new-file-mark-type)
 
 
 #### Consideration: Confusingly similar to `--data-value-file`
@@ -203,6 +221,58 @@ We observe:
 - in the rare case where the user intends to append values to an array, they can accomplish this through a Data Value Overlay.
 
 Given those conditions, we conclude that the most common cases are best served by _replacing_ the specified values.
+
+
+#### Consideration: Implies a Significant Effort to Implement
+
+Introducing a second way to supply input files _and_ presenting this new approach as the _primary_ means of supplying Data Values implies a significant effort. This is in _addition_ to the effort required to implement the specified feature, itself (i.e. the `--data-values-file` flag and related plumbing),
+
+This includes (but is not limited to):
+- extending the bulk-in/bulk-out interface to also accept data values in a separate key.
+- extending the `ytt` Playground to separately accept these data values files and use the updated bulk-in/bulk-out feature.
+- provide some means of populating the Playground with a gist that includes one or more Data Values files.
+- rework a non-trivial amount of documentation that describes the use of Data Values (the scope of which is sketched in [Clear Consistent Messaging Around Data Values](#clear-consistent-messaging-around-data-values), above).
+
+There's a risk that if this work is _not_ included, users can become quite confused by the multiple ways to specify their Data Values.
+
+Possible mitigation:
+- quietly introduce the specified flag, making it available for tools integrators, specifically. Spread the investment describe in the previous paragraph over time. Make the documentation/messaging change as the final step.
+
+#### Consideration: Potentially Confusing that Data Values Overlays are not Data Values files
+
+It is probable that a user submits a file with document(s) annotated with `@data/values` to the `--data-values-file` flag. If they did, they would get an error given that no annotations would be permitted in the such input.
+
+Beyond this being surprising (i.e. a failure when a success seems guaranteed), it also risks creating cognitive dissonance regarding Data Values: if a "Data Values" is not acceptable input to `--data-values-file` then, what _is_ a "Data Value"?
+
+This amounts to a kind of [accidental complexity](http://www.catb.org/~esr/writings/taoup/html/ch13s01.html#id2961759) from two features being non-orthogonal.
+
+Potential resolutions:
+- deprecate and replace `@data/values` with `@overlay/match data_values=True`
+- add another flag `--data-values-overlay` that accepts overlays
+- reject the approach described in this version of the proposal in favor of the file-mark approach
+  - mitigate some of the interface complexity by considering syntactic sugar in the form of file extensions: `.ytt.data.yml` as a short-hand for `--file-mark "(path):type=yaml-plain-data-values"
+  
+_This consideration is undecided; captured as the Open Question: [Q1. Is the complexity worth it?](#q1-is-the-complexity-worth-it)_
+
+
+#### Other Approach Considered: Introduce a new File Mark Type
+
+[A previous version of this proposal](https://github.com/vmware-tanzu/carvel-community/blob/2a817298f3e263438ff3767b2bc4ccfcb9dbbc1b/proposals/ytt/002-raw-data-values/README.md) centered around the idea of being able to mark an input file (i.e. a file implied by a `--file` argument) as a "Plain YAML Data Value" file.
+
+**Pros:**
+- maintains a consistent interface: all input files continue to be provided through one interface: the `--file` flag;
+- preserves orthogonality: it keeps the two concerns of "which order to process" and "how to process" separate.
+
+**Cons:**
+- it does nothing to help make the use of Data Values simpler; in fact, it complicates the use by requiring an additional (and rather verbose) flag.
+- there would be two flavors of Data Values being included with rather different behaviors: \
+  _(this specific point was not recognized in the previous version of this proposal, but came into view during some design discussions which prompted the pivot to this approach.)_
+  - files annotated with `@data/values`...
+    - _append_ its array items to any existing array, by default
+    - will report overlay error when a key in the file is not already defined as a Data Value
+  - files marked with `type=yaml-plain-data-values`...
+    - _replace_ any existing array values with its own
+    - when a key is not yet a Data Value, declares it as a new one
 
 
 ### Examples 
@@ -281,7 +351,7 @@ bar:
 ```
 
 ```console
-$ ytt --data-values-file values.yml --data-values-file values2.yml --data-values-inspect
+$ ytt --data-values-file values.yml --data-values-inspect
 foo: 13
 bar:
 - first
@@ -333,15 +403,13 @@ ree: true
 ```
 
 ```console
-$ ytt --data-values-file values.yml --data-values-file +:values2.yml --data-values-inspect
+$ ytt --data-values-file values.yml --data-values-file values2.yml --data-values-inspect
 foo: 13
 bar:
 - first
 - second
 ree: true
 ```
-
-_Without the `+:` prefix, `ytt` would complain that `ree` was not found._
 
 #### Example: Using Process Substitution to Supply Data Values
 
@@ -476,3 +544,8 @@ answer: #@ data.values
 $ ytt -f template --data-values-file values.yml
 answer: 42
 ```
+
+## Open Questions
+
+### Q1. Is the complexity worth it?
+Is the complexity that comes from providing two separate interfaces for supplying Data Values with the benefits of this feature?
