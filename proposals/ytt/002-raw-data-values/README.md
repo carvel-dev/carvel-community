@@ -172,6 +172,14 @@ This includes (but is not limited to):
 - when Data Values are mentioned, the "Data Values File" feature is referenced (rather than the "Data Values Overlay" feature)
 - examples use Data Values Files (instead of Data Values Overlays), unless overlay-specific features are being employed
 
+It's also crucial to keep in mind that there are two fundamental proto-personas affected by the introduction of another way to supply Data Values:
+- Integrators -- the folks who are incorporating `ytt` as an implementation detail of their tooling
+- Configuration Consumer -- people who are using `ytt` as an "end user": using the CLI directly.
+
+Integrators ought to find it easy to discover this new flag as it relates to the other `--data-value...` flags, as those are most suitable for integrators, already.
+
+Configuration Consumers should only find it easy to discover this new flag when all of the overall messaging (i.e. docs, examples, Playground) support it as a first class feature.
+
 _(see also: [Consideration: Implies a Significant Effort to Implement](#consideration-implies-a-significant-effort-to-implement))_
 
 
@@ -193,7 +201,7 @@ The following are commentary regarding the above specification:
 - [Consideration: Confusingly similar to `--data-value-file`](#consideration-confusingly-similar-to---data-value-file)
 - [Consideration: Does not support merging arrays](#consideration-does-not-support-merging-arrays)
 - [Other Approach Considered: Introduce a new File Mark Type](#other-approach-considered-introduce-a-new-file-mark-type)
-
+- [Consideration: Potentially Confusing that Data Values Overlays are not Data Values files](#consideration-potentially-confusing-that-data-values-overlays-are-not-data-values-files)
 
 #### Consideration: Confusingly similar to `--data-value-file`
 
@@ -245,17 +253,17 @@ It is probable that a user submits a file with document(s) annotated with `@data
 
 Beyond this being surprising (i.e. a failure when a success seems guaranteed), it also risks creating cognitive dissonance regarding Data Values: if a "Data Values" is not acceptable input to `--data-values-file` then, what _is_ a "Data Value"?
 
-This amounts to a kind of [accidental complexity](http://www.catb.org/~esr/writings/taoup/html/ch13s01.html#id2961759) from two features being non-orthogonal.
-
-Potential resolutions:
-- deprecate and replace `@data/values` with `@overlay/match data_values=True`
-- add another flag `--data-values-overlay` that accepts overlays
-- reject the approach described in this version of the proposal in favor of the file-mark approach
-  - mitigate some of the interface complexity by considering syntactic sugar in the form of file extensions: `.ytt.data.yml` as a short-hand for `--file-mark "(path):type=yaml-plain-data-values"`
-  
-_This consideration is undecided; captured as the Open Question: [Q1. Is the complexity worth it?](#q1-is-the-complexity-worth-it)_
+This amounts to a kind of [accidental complexity](http://www.catb.org/~esr/writings/taoup/html/ch13s01.html#id2961759) from two features being somewhat non-orthogonal.
 
 
+To mitigate this complexity:
+- include a page in the docs dedicated to singularly covering these two file types. 
+  - differentiate them clearly
+  - make plain when each would be used (use-case based) and by what mechanisms
+- when a user supplies a Data Values Overlay as the input for the `--data-values-file` flag, let it be that the error message is clear about this difference.
+  - the error message references the previously mentioned page in the docs(?)
+
+With those measures in place, we believe the added complexity is worth it.
 
 
 #### Other Approach Considered: Introduce a new File Mark Type
@@ -277,6 +285,11 @@ _This consideration is undecided; captured as the Open Question: [Q1. Is the com
     - _replace_ any existing array values with its own
     - when a key is not yet a Data Value, declares it as a new one
 
+As it stands, today, it's more clear that:
+- the approach outlined in this revision of this proposal is not mutually exclusive to providing other means of including Data Values Files (although care should be taken in creating deliberately overlapping features)
+- the design tension pulling from the family of `--data-value...` flags feels stronger than the need to keep all file-based inputs together (another way of stating the pros, listed above)
+  - the behavior of this flag (intentionally) follows that of the other `--data-value...` flags and therefore a natural extension.
+  - in practice, Data Values that actually configure/personalize the `ytt` invocation are typically located in a place elsewhere from the author supplied templates, overlays, and _declaring_ Data Values (i.e. those that establish _what are_ the configuration variables).
 
 ### Examples 
 
@@ -549,6 +562,3 @@ answer: 42
 ```
 
 ## Open Questions
-
-### Q1. Is the complexity worth it?
-Is the complexity that comes from providing two separate interfaces for supplying Data Values with the benefits of this feature?
