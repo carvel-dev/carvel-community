@@ -183,6 +183,7 @@ As such:
 - YAML comments (i.e. strings prefixed with `#`) are permitted (as well as other features enjoyed by plain YAML)
 - `ytt` annotations (i.e. strings prefixed with `#@`) are _not_ permitted
   - this helps catch cases where a user submits a `ytt` template (e.g. a Data Values Overlay, containing at least the `@data/values` document annotation), and it quietly ignores all directives because the file is treated as a plain YAML.
+  - one can also understand this constraint as a way that this flag behaves exactly like its `--data-value...` siblings: that one can't include "directives" in those other flags, nor can they with this `--data-value-file` flag.
   - when such features are desired, users can employ / integrators can allow Data Values Overlays and direct those inputs to the `--file` flag.
 
 ### Analysis
@@ -250,9 +251,11 @@ Potential resolutions:
 - deprecate and replace `@data/values` with `@overlay/match data_values=True`
 - add another flag `--data-values-overlay` that accepts overlays
 - reject the approach described in this version of the proposal in favor of the file-mark approach
-  - mitigate some of the interface complexity by considering syntactic sugar in the form of file extensions: `.ytt.data.yml` as a short-hand for `--file-mark "(path):type=yaml-plain-data-values"
+  - mitigate some of the interface complexity by considering syntactic sugar in the form of file extensions: `.ytt.data.yml` as a short-hand for `--file-mark "(path):type=yaml-plain-data-values"`
   
 _This consideration is undecided; captured as the Open Question: [Q1. Is the complexity worth it?](#q1-is-the-complexity-worth-it)_
+
+
 
 
 #### Other Approach Considered: Introduce a new File Mark Type
