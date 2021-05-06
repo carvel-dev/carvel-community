@@ -1,7 +1,7 @@
 ---
 title: "Maintaining Carvel Documentation"
 authors: [ "John Ryan <ryanjo@vmware.com>" ]
-status: "in-review"
+status: "accepted"
 approvers: [ "Aaron Hurley <ahurley@vmware.com>", "Helen George <hskgeo@vmware.com>", "Vibhas Kumar <vibkumar@vmware.com>"]
 ---
 
