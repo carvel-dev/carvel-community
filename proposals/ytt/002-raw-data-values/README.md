@@ -3,7 +3,7 @@ title: Data Values as Plain YAML
 authors:
   - John Ryan <ryanjo@vmware.com>
   - Steven Locke <slocke@vmware.com>
-status: in-review
+status: accepted
 approvers:
   - Dmitriy Kalinin <dkalinin@vmware.com>
   - Eli Wrenn <ewrenn@vmware.com>
