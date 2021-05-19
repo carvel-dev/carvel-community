@@ -1,7 +1,7 @@
 ---
 title: "Splitting the Package CR"
 authors: [ "Eli Wrenn <ewrenn@vmware.com>" ]
-status: "draft"
+status: "accepted"
 approvers: [ "Dmitriy Kalinin <dkalinin@vmware.com>" ]
 ---
 
