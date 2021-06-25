@@ -964,6 +964,12 @@ overrides:
 
   Something to consider while doing the implementation. Nevertheless if we decide to use the SHA we should change the
   field `images[].image` to `images[].sha`.
+  
+- Other option for strategy configuration. After looking into the suggestion that @jorgemoralespou made in a comment I created a [gist](https://gist.github.com/joaopapereira/a3573130fa85d9e8d56a602d60812f48) that contain all the examples that I think make sense.
+  - Do the names of the properties make sense?
+  - Can users better understand this concept of using parameters to configure the strategies?
+  - Are there any other use cases that make sense to represent?
+  After the above questions are answered we should decide if we want this new approach. This should be the last open point in this proposal after a decision is made about this, the proposal should be reviewed and accepted/rejected. 
 
 ## Answered Questions
 
