@@ -6,7 +6,7 @@ title: "kapp-controller"
   <div class="wrapper clearfix">
     <div class="text-block">
       <h1>Continuous delivery and package management for Kubernetes</h1>
-      <p>kapp-controller's declarative APIs and layered approach enable you to build, deploy, and manage your own 
+      <p>kapp-controller's declarative APIs and layered approach enables you to build, deploy, and manage your own 
         applications. It also helps package your software into easily distributable packages and enables your users 
         to discover, configure, and install these packages on a Kubernetes cluster.
       </p>
@@ -55,11 +55,6 @@ title: "kapp-controller"
 <div class="wrapper">
   <div class="text-content" id="examples">
     <h2>Basic Usages</h2>
-    <p>Before learning about kapp-controller's custom resources (CR), it may be helpful to start with a metaphor. 
-      In object-oriented programming, you may install a library to get the definition of a class, which you can 
-      then instantiate via a constructor. A PackageRepository is like a library, each Package is a class definition, 
-      a PackageInstall is like a call to the class constructor, and the App is the instantiation of the class.
-    </p>
     <h3>App development</h3>
     <p>kapp-controller's App CR provides provides a lightweight, flexibile way to choose how to fetch, 
       template, and deploy your application to Kubernetes. It can be used independently of kapp-controller's 
