@@ -1,4 +1,4 @@
-**DEPRECATED**: This repo has been deprecated in favor of https://github.com/vmware-tanzu/carvel
+**DEPRECATED**: This repo has been deprecated in favor of https://github.com/carvel-dev/carvel
 
 ![logo](logos/CarvelLogo.png)
 
